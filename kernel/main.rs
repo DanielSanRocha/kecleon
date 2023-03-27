@@ -2,12 +2,13 @@
 #![no_main]
 
 pub mod panic;
-pub mod video;
+pub mod memory;
+pub mod screen;
 
 #[no_mangle]
 pub extern "C" fn main() -> ! {
-    video::clear();
-    video::print(b"Hello Missigno!", video::VgaColor::White);
+    screen::clear();
+    screen::print(b"Kecleon!!", screen::VgaColor::LightGreen);
 
     loop {}
 }

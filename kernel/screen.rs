@@ -1,6 +1,6 @@
 const VGA_BUFFER: *mut u8 = 0xb8000 as *mut u8;
-const CHARACTERS_PER_LINE: u16 = 100;
-const NUMBER_OF_LINES: u16 = 50;
+const CHARACTERS_PER_LINE: u16 = 80;
+const NUMBER_OF_LINES: u16 = 25 ;
 
 #[derive(Copy, Clone)]
 pub enum VgaColor {
@@ -20,6 +20,10 @@ pub enum VgaColor {
     LightMagenta = 13,
     LightBrown = 14,
     White = 15
+}
+
+pub fn print_char(c: char, col: u8, row: u8, color: VgaColor) {
+
 }
 
 pub fn clear() {
