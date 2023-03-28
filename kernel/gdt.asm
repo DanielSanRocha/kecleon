@@ -1,5 +1,5 @@
 global gdt_flush
-global gdt
+global gp
 
 gdt_flush:
     lgdt [gp]
@@ -13,9 +13,10 @@ gdt_flush:
 gdt_flush_ret:
     ret
 
-gdt:
-resb 1024
-gdt_end:
 gp:
-    dw gdt_end - gdt - 1
-    dd gdt
+    dw 0
+    dd 0
+
+global hlt
+hlt:
+    hlt

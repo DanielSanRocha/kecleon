@@ -28,11 +28,14 @@ programs-i386: # Build and copy the programs to the loopback device
 build-i386: programs-i386 ## Builds the kernel and all the programs to the i386 architecture
 	nasm -f elf32 kernel/main.asm -o kernel/main_asm.o
 	nasm -f elf32 kernel/gdt.asm -o kernel/gdt_asm.o
+	nasm -f elf32 kernel/idt.asm -o kernel/idt_asm.o
+	i686-linux-gnu-gcc -g -O -c kernel/idt.c -o kernel/idt_c.o
+	i686-linux-gnu-gcc -g -O -c kernel/gdt.c -o kernel/gdt_c.o
 	cargo build --target i686-unknown-linux-gnu
-	i686-linux-gnu-ld -T kernel/link-i386.ld -o kernel-101 -Ltarget/i686-unknown-linux-gnu/debug kernel/main_asm.o kernel/gdt_asm.o -lkecleon
+	i686-linux-gnu-ld -T kernel/link-i386.ld -o kernel-101 -Ltarget/i686-unknown-linux-gnu/debug kernel/main_asm.o kernel/gdt_asm.o kernel/idt_asm.o kernel/idt_c.o kernel/gdt_c.o -lkecleon
 
 boot-i386: build-i386 ## Boots the kernel in a i386 machine
-	qemu-system-i386 -kernel kernel-101 disk.iso
+	qemu-system-i386 -kernel kernel-101 -drive format=raw,file=disk.iso -d int,cpu_reset -no-reboot -append "root=/dev/hda"
 
 build-armv7: ## Builds the kernel and all the programs targetting armv7 architecture
 	nasm -f elf32 kernel/main.asm -o kernel/main_asm.o
@@ -41,3 +44,8 @@ build-armv7: ## Builds the kernel and all the programs targetting armv7 architec
 
 boot-armv7: build-armv7 ## Boot the kernel in a armv7 machine
 	qemu-arm -kernel kernel-101 disk.iso
+
+debug-i386: build-i386 ## Starts qemu in debug mode (gdb)
+	qemu-system-i386 -s -S -kernel kernel-101 -drive format=raw,file=disk.iso -d int,cpu_reset -no-reboot -append "root=/dev/hda"
+
+bochs-i386: build-i386 ## Starts the kernel on bochs

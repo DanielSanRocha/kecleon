@@ -2,12 +2,18 @@
 #![no_main]
 
 pub mod gdt;
+pub mod idt;
+pub mod keyboard;
 pub mod memory;
 pub mod panic;
 pub mod screen;
 
+extern "C" {
+    fn hlt();
+}
+
 #[no_mangle]
-pub extern "C" fn main() -> ! {
+pub extern "C" fn main() {
     screen::initialize();
 
     screen::print(b"Welcome to ", screen::VgaColor::LightMagenta);
@@ -20,9 +26,27 @@ pub extern "C" fn main() -> ! {
         screen::VgaColor::LightMagenta,
     );
     gdt::initialize();
-    screen::print(b"GDT - Loaded!", screen::VgaColor::White);
+    screen::print(b"Loaded!", screen::VgaColor::Green);
+
+    screen::print(
+        b"\nIDT - Loading IDT table...",
+        screen::VgaColor::LightMagenta,
+    );
+    idt::initialize();
+    screen::print(b" Loaded!", screen::VgaColor::Green);
+
+    screen::print(
+        b"\nKeyboard - Loading keyboard...",
+        screen::VgaColor::LightMagenta,
+    );
+    keyboard::initialize();
+    screen::print(b" Loaded!", screen::VgaColor::Green);
 
     screen::print(b"\n\n>", screen::VgaColor::White);
 
-    loop {}
+    unsafe {
+        loop {
+            hlt()
+        }
+    }
 }
