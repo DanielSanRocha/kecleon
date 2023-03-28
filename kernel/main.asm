@@ -13,7 +13,6 @@ extern load_gdt
 start:
   cli
   mov esp, stack_space
-  call load_gdt
   call main
   hlt
 

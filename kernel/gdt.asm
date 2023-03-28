@@ -1,37 +1,21 @@
-global load_gdt
-global gdt_code
-global gdt_data
+global gdt_flush
+global gdt
 
-gdt_start:
-    dd 0x0
-    dd 0x0
-
-gdt_code:
-    dw 0xffff
-    dw 0x0
-    db 0x0
-    db 10011010
-    db 11001111b
-    db 0x0
-
-gdt_data:
-    dw 0xffff
-    dw 0x0
-    db 0x0
-    db 10010010b
-    db 11001111b
-    db 0x0
-
-gdt_end:
-
-gdt_descriptor:
-    dw gdt_end - gdt_start - 1
-    dd gdt_start
-
-load_gdt:
-    cli
-    lgdt [gdt_descriptor]
+gdt_flush:
+    lgdt [gp]
+    mov ax, 0x10
+    mov ds, ax
+    mov es, ax
+    mov fs, ax
+    mov gs, ax
+    mov ss, ax
+    jmp 0x08:gdt_flush_ret
+gdt_flush_ret:
     ret
 
-CODE_SEG equ gdt_code - gdt_start
-DATA_SEG equ gdt_data - gdt_start
+gdt:
+resb 1024
+gdt_end:
+gp:
+    dw gdt_end - gdt - 1
+    dd gdt
