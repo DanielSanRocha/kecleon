@@ -37,15 +37,7 @@ build-i386: programs-i386 ## Builds the kernel and all the programs to the i386 
 	i686-linux-gnu-ld -T kernel/link-i386.ld -o kernel.bin -Ltarget/i686-unknown-linux-gnu/debug kernel/main_asm.o kernel/gdt_asm.o kernel/idt_asm.o kernel/idt_c.o kernel/memory_c.o kernel/gdt_c.o -lkecleon
 
 boot-i386: build-i386 install ## Boots the kernel in a i386 machine
-	qemu-system-i386 -drive format=raw,file=disk.img -d int,cpu_reset -no-reboot
+	qemu-system-i386 -hda disk.img -d int,cpu_reset -no-reboot
 
 debug-i386: build-i386 install ## Starts qemu in debug mode (gdb)
-	qemu-system-i386 -s -S -drive format=raw,file=disk.img -d int,cpu_reset -no-reboot
-
-build-armv7: ## Builds the kernel and all the programs targetting armv7 architecture
-	nasm -f elf32 kernel/main.asm -o kernel/main_asm.o
-	cargo build --target armv7a-none-eabi
-	arm-none-eabi-ld -T kernel/link-armv7.ld -o kernel.bin -Ltarget/armv7a-none-eabi/debug kernel/main_asm.o -lkecleon
-
-boot-armv7: build-armv7 ## Boot the kernel in a armv7 machine
-	qemu-arm -drive format=raw,file=disk.img
+	qemu-system-i386 -s -S -hda disk.img -d int,cpu_reset -no-reboot

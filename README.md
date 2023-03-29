@@ -1,13 +1,13 @@
 # Kecleon OS
 
-![kecleon](resources/kecleon.png "Kecleon!")
+<img src="resources/kecleon.png" alt="Kecleon" style="width: 250px; height: 250px"/>
 
-A simple OS I made in Rust, C and assembly to learn more about kernels. Run
+A simple OS I made with Rust, C and assembly (nasm) to learn more about kernels. Run
 ```bash
 make help
 ```
 for a list of options.
-This is a working in progress =)
+This is a work in progress =)
 
 ## Setup
 

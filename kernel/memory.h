@@ -2,6 +2,6 @@
 #define MEMORY_H_
 
 void c_outb (unsigned int _port, unsigned char _data);
-unsigned char c_inb(unsigned short port);
+unsigned char c_inb(unsigned int port);
 
 #endif

@@ -3,6 +3,12 @@ use crate::screen;
 
 #[derive(Default)]
 #[repr(C, packed)]
+struct MasterBootRecord {
+    magic_number: u32,
+}
+
+#[derive(Default)]
+#[repr(C, packed)]
 struct Ext2SuperBlock {
     inodes_count: u32,
     block_count: u32,
@@ -35,24 +41,22 @@ static mut SUPERBLOCK: Ext2SuperBlock = Ext2SuperBlock {
 const ATA: *mut u8 = 0x1F0 as *mut u8;
 
 pub fn initialize() {
+    let mbr = memory::kmalloc(1024) as *mut MasterBootRecord;
+
     unsafe {
-        memory::outb(ATA, 0x40, 6);
-        memory::inb(ATA, 1);
+        screen::print_int((*mbr).magic_number, screen::VgaColor::White);
+        read_sectors(mbr as *mut u8, 0, 4);
+        screen::print_int((*mbr).magic_number, screen::VgaColor::White);
 
-        read_sectors(&mut SUPERBLOCK as *mut Ext2SuperBlock as *mut u8, 4, 4);
-
-        if SUPERBLOCK.magic_number != 0xEF53 {
-            screen::print(b"  Invalid EXT2 filesystem, kernel panic", screen::VgaColor::Red);
-            loop {}
+        if SUPERBLOCK.magic_number != 0xef53 {
+            panic!(" Invalid EXT2 filesystem. Kernel Panic!!!");
         }
-
-        screen::print_int(SUPERBLOCK.magic_number as u32, screen::VgaColor::White);
     }
 }
 
 fn wait_bsy() {
     loop {
-        if memory::inb(ATA, 7) & 0x08 == 0 {
+        if (memory::inb(ATA, 7) & 0x80) == 0x80 {
             break;
         }
     }
@@ -76,13 +80,14 @@ fn read_sectors(ptr: *mut u8, lba: u32, sector_count: u8) {
     memory::outb(ATA, (lba >> 16) as u8, 5);
     memory::outb(ATA, 0x20, 7);
 
+    screen::print(b" Reading sectors...", screen::VgaColor::White);
     for j in 0..sector_count {
         wait_bsy();
         wait_drq();
 
         for i in 0..=255 {
             let c = memory::inb(ATA, 0);
-            memory::outb(ptr, c, (i as u16 + j as u16 * 256) as isize);
+            memory::outb(ptr, c, (i as u32 + j as u32 * 256) as isize);
         }
     }
 }

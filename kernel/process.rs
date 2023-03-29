@@ -10,7 +10,7 @@ static mut PROCESS_VEC: *mut ProcessEntry = 0x0 as *mut ProcessEntry;
 
 pub fn initialize() {
     unsafe {
-        PROCESS_VEC = memory::kmalloc() as *mut ProcessEntry;
+        PROCESS_VEC = memory::kmalloc(32 * 256) as *mut ProcessEntry;
 
         for i in 0..256 {
             let proc = PROCESS_VEC.offset(i);
