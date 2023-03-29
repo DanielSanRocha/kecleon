@@ -1,12 +1,3 @@
 {
-    "files.exclude": {
-        "**/*.o": true,
-        "**/*.a": true,
-        "**/*.bin": true,
-        "**/kernel-*": true,
-        "**/target/": true,
-        "**/disk.iso": true,
-        "**/tmp/": true,
-        "programs/shell/shell": true
-    }
+    "files.exclude": {}
 }

@@ -1,3 +1,4 @@
+#include "memory.h"
 #include "keyboard.h"
 
 extern void isr0();
@@ -83,19 +84,6 @@ void idt_set_gate(unsigned char num, unsigned long base, unsigned short sel, uns
   idt[num].flags = flags;
 }
 
-inline void outb (unsigned short _port, unsigned char _data) {
-    __asm__ __volatile__ ("outb %1, %0" : : "dN" (_port), "a" (_data));
-}
-
-inline unsigned char inb(unsigned short port) {
-    unsigned char ret;
-    asm volatile ( "inb %1, %0"
-                   : "=a"(ret)
-                   : "Nd"(port) );
-    return ret;
-}
-
-
 #define ICW1_INIT	0x10
 #define ICW1_ICW4 0x01
 
@@ -142,20 +130,20 @@ void idt_install() {
     idt_set_gate(30, (unsigned)isr30, 0x08, 0x8E);
     idt_set_gate(31, (unsigned)isr31, 0x08, 0x8E);
 
-    outb(PIC1_COMM, ICW1_INIT + ICW1_ICW4);
-    outb(PIC2_COMM, ICW1_INIT + ICW1_ICW4);
+    c_outb(PIC1_COMM, ICW1_INIT + ICW1_ICW4);
+    c_outb(PIC2_COMM, ICW1_INIT + ICW1_ICW4);
 
-    outb(PIC1_DATA, 0x20);
-    outb(PIC2_DATA, 0x28);
+    c_outb(PIC1_DATA, 0x20);
+    c_outb(PIC2_DATA, 0x28);
 
-    outb(PIC1_DATA, 0x04);
-    outb(PIC2_DATA, 0x02);
+    c_outb(PIC1_DATA, 0x04);
+    c_outb(PIC2_DATA, 0x02);
 
-    outb(PIC1_DATA, 0x01);
-    outb(PIC2_DATA, 0x01);
+    c_outb(PIC1_DATA, 0x01);
+    c_outb(PIC2_DATA, 0x01);
 
-    outb(PIC1_DATA, 0x0);
-    outb(PIC2_DATA, 0x0);
+    c_outb(PIC1_DATA, 0x0);
+    c_outb(PIC2_DATA, 0x0);
 
     idt_set_gate(32, (unsigned) irq0, 0x08, 0x8E);
     idt_set_gate(33, (unsigned) irq1, 0x08, 0x8E);
@@ -182,20 +170,20 @@ extern void print_int(unsigned long i);
 extern void print_char(char c);
 
 void fault_handler(struct regs *r) {
-  outb(0x20, 0x20);
+  c_outb(0x20, 0x20);
 }
 
 void irq_handler(struct regs *r) {
   if(r->int_no == 33) {
-    unsigned char c = inb(0x60);
+    unsigned char c = c_inb(0x60);
     if(!(c & 0X80)) {
       keyboard_handler(kbdus[c]);
     }
   }
 
   if (r->int_no >= 40) {
-    outb(PIC2_COMM, 0x20);
+    c_outb(PIC2_COMM, 0x20);
   }
 
-  outb(PIC1_COMM, 0x20);
+  c_outb(PIC1_COMM, 0x20);
 }

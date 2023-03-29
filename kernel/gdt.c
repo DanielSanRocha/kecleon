@@ -15,7 +15,7 @@ struct GdtPtr
 
 extern void gdt_flush();
 extern GdtPtr gp;
-GdtEntry gdt_table[3];
+GdtEntry gdt_table[5];
 
 void gdt_set_gate(unsigned short num, unsigned short base, unsigned long limit, unsigned char access, unsigned char gran) {
     gdt_table[num].base_low = (base & 0xFFFF);
@@ -36,6 +36,7 @@ void gdt_install() {
     gdt_set_gate(0, 0, 0, 0, 0);
     gdt_set_gate(1, 0, 0xFFFFFFFF, 0x9A, 0xCF);
     gdt_set_gate(2, 0, 0xFFFFFFFF, 0x92, 0xCF);
+
 
     gdt_flush();
 }

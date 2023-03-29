@@ -6,6 +6,8 @@ const VGA_NUMBER_OF_LINES: u16 = 25;
 
 static mut CURRENT_POS: usize = 0;
 
+use crate::memory;
+
 #[derive(Copy, Clone)]
 pub enum VgaColor {
     Black = 0,
@@ -26,32 +28,21 @@ pub enum VgaColor {
     White = 15,
 }
 
-use crate::memory;
-
-fn enable_cursor() {
-    memory::outb(VGA_CURSOR, 0x0A, 1);
-    let curstart = memory::inb(VGA_BUFFER, 1) & 0x1F;
-
-    memory::outb(VGA_CURSOR, 0x0A, 0);
-    memory::outb(VGA_CURSOR, curstart | 0x20, 1);
-}
-
-fn update_cursor(x: u16, y: u16) {
+pub fn update_cursor(x: u16, y: u16) {
     let position = y * VGA_CHARACTERS_PER_LINE + x;
 
     memory::outb(VGA_CURSOR, 0x0F, 0);
-    memory::outb(VGA_CURSOR, (position & 0xFF) as u8, 1);
+    memory::outb(VGA_CURSOR, position as u8, 1);
 
     memory::outb(VGA_CURSOR, 0x0E, 0);
-    memory::outb(VGA_CURSOR, ((position >> 8) & 0xFF) as u8, 1);
+    memory::outb(VGA_CURSOR, (position >> 8) as u8, 1);
 }
 
 pub fn initialize() {
     unsafe {
         CURRENT_POS = 0;
-        clear();
-        enable_cursor();
         update_cursor(0, 0);
+        clear();
     }
 }
 
@@ -71,8 +62,7 @@ pub fn print(message: &[u8], color: VgaColor) {
 pub fn print_char(c: u8, color: VgaColor) {
     unsafe {
         if c == '\n' as u8 {
-            CURRENT_POS = ((CURRENT_POS as u16 / VGA_CHARACTERS_PER_LINE) * VGA_CHARACTERS_PER_LINE
-                + VGA_CHARACTERS_PER_LINE) as usize
+            CURRENT_POS = ((CURRENT_POS as u16 / VGA_CHARACTERS_PER_LINE) * VGA_CHARACTERS_PER_LINE + VGA_CHARACTERS_PER_LINE) as usize
         } else {
             memory::outb(VGA_BUFFER, c, (CURRENT_POS) as isize * 2);
             memory::outb(VGA_BUFFER, color as u8, (CURRENT_POS) as isize * 2 + 1);

@@ -6,3 +6,4 @@ target/
 disk.iso
 tmp/
 programs/shell/shell
+disk.img

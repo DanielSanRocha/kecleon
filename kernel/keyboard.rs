@@ -1,6 +1,3 @@
-const KEYBOARD: *mut u8 = 0x60 as *mut u8;
-
-use crate::memory;
 use crate::screen;
 
 pub fn initialize() {}
