@@ -37,6 +37,8 @@ const ATA: *mut u8 = 0x1F0 as *mut u8;
 pub fn initialize() {
     unsafe {
         memory::outb(ATA, 0x40, 6);
+        memory::inb(ATA, 1);
+
         read_sectors(&mut SUPERBLOCK as *mut Ext2SuperBlock as *mut u8, 4, 4);
 
         if SUPERBLOCK.magic_number != 0xEF53 {
@@ -50,11 +52,7 @@ pub fn initialize() {
 
 fn wait_bsy() {
     loop {
-        let s = memory::inb(ATA, 7);
-        screen::print_int(s as u32, screen::VgaColor::White);
-        screen::print_char(' ' as u8, screen::VgaColor::White);
-
-        if s & 0x80 == 0 {
+        if memory::inb(ATA, 7) & 0x08 == 0 {
             break;
         }
     }
