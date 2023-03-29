@@ -37,7 +37,15 @@ build-i386: programs-i386 ## Builds the kernel and all the programs to the i386 
 	i686-linux-gnu-ld -T kernel/link-i386.ld -o kernel.bin -Ltarget/i686-unknown-linux-gnu/debug kernel/main_asm.o kernel/gdt_asm.o kernel/idt_asm.o kernel/idt_c.o kernel/memory_c.o kernel/gdt_c.o -lkecleon
 
 boot-i386: build-i386 install ## Boots the kernel in a i386 machine
-	qemu-system-i386 -hda disk.img -d int,cpu_reset -no-reboot
+	qemu-system-i386 -hda disk.img -d int,cpu_reset -no-reboot -m 1G
 
 debug-i386: build-i386 install ## Starts qemu in debug mode (gdb)
-	qemu-system-i386 -s -S -hda disk.img -d int,cpu_reset -no-reboot
+	qemu-system-i386 -s -S -hda disk.img -d int,cpu_reset -no-reboot -m 1G
+
+virtualbox: build-i386 install ## Create a vdi image with the kernel and programs
+	rm -f disk.vdi
+	VBoxManage convertfromraw --format VDI disk.img disk.vdi
+
+bochs: build-i386 install ## Run on bochs
+	cp disk.img hda.iso
+	bochs -f bochsrc.txt

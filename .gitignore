@@ -2,8 +2,11 @@
 *.a
 *.bin
 kernel-*
+*.iso
+*.img
+*.vdi
+*.lock
 target/
-disk.iso
 tmp/
 programs/shell/shell
-disk.img
+out.bochs

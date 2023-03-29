@@ -1,0 +1,7 @@
+megs: 64
+display_library: sdl2
+ata0-master: type=disk, path="hda.iso", mode=flat
+log: out.bochs
+cpu: ips=15000000
+boot: disk
+###END###
