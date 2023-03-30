@@ -166,8 +166,7 @@ void idt_install() {
 }
 
 extern void keyboard_handler(unsigned char c);
-extern void print_int(unsigned long i);
-extern void print_char(char c);
+extern void ata_handler();
 
 void fault_handler(struct regs *r) {
   c_outb(0x20, 0x20);
@@ -180,6 +179,10 @@ void irq_handler(struct regs *r) {
       keyboard_handler(kbdus[c]);
     }
   }
+
+  // if(r->int_no == 46) {
+  //   ata_handler();
+  // }
 
   if (r->int_no >= 40) {
     c_outb(PIC2_COMM, 0x20);

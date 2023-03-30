@@ -75,6 +75,20 @@ pub fn print_char(c: u8, color: VgaColor) {
     }
 }
 
+pub fn print_string(str: *mut u8, color: VgaColor) {
+    let mut i = 0;
+    loop {
+        unsafe {
+            let c = *str.offset(i);
+            if c == 0 {
+                break;
+            }
+            print_char(c, color);
+            i += 1;
+        }
+    }
+}
+
 pub fn print_int(i: u32, color: VgaColor) {
     let mut j = i;
     let mut c = 0 as u8;

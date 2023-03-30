@@ -15,15 +15,25 @@ static mut MEMORY_VEC: *mut MemoryEntry = HEAP_START as *mut MemoryEntry;
 pub fn outb(source: *mut u8, c: u8, offset: isize) {
     unsafe {
         *source.offset(offset) = c;
-        // c_outb(source as u32 + offset as u32, c)
     }
 }
 
 pub fn inb(source: *mut u8, offset: isize) -> u8 {
+    unsafe { *source.offset(offset) }
+}
+
+pub fn u32_outb(source: *mut u32, c: u32, offset: isize) {
     unsafe {
-        *source.offset(offset)
-        // c_inb(source as u32 + offset as u32)
+        *source.offset(offset) = c;
     }
+}
+
+pub fn u32_inb(source: *mut u32, offset: isize) -> u32 {
+    unsafe { *source.offset(offset) }
+}
+
+pub fn u16_inb(source: *mut u16, offset: isize) -> u16 {
+    unsafe { *source.offset(offset) }
 }
 
 pub fn memcpy(source: *mut u8, dest: *mut u8, bytes: isize) {
@@ -83,6 +93,11 @@ pub fn kmalloc(size: u32) -> *mut u8 {
     unsafe {
         let tmp = HEAP_START.offset(CURRENT_OFFSET as isize);
         CURRENT_OFFSET += size;
+
+        if CURRENT_OFFSET >= 4 * 1024 * 1024 {
+            panic!("Out of memory! Kernel Panic!");
+        }
+
         tmp
     }
 }

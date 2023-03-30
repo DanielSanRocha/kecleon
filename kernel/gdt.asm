@@ -20,3 +20,14 @@ gp:
 global hlt
 hlt:
     hlt
+    ret
+
+global cli
+cli:
+    cli
+    ret
+
+global sti
+sti:
+    sti
+    ret

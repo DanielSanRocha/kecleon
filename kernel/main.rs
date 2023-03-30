@@ -8,15 +8,22 @@ pub mod idt;
 pub mod keyboard;
 pub mod memory;
 pub mod panic;
+pub mod pci;
 pub mod process;
 pub mod screen;
 
 extern "C" {
     fn hlt();
+    fn cli();
+    fn sti();
 }
 
 #[no_mangle]
 pub extern "C" fn main() {
+    unsafe {
+        cli();
+    }
+
     screen::initialize();
 
     screen::print(b"Welcome to ", screen::VgaColor::LightMagenta);
@@ -44,14 +51,19 @@ pub extern "C" fn main() {
     process::initialize();
     screen::print(b" Loaded!", screen::VgaColor::Green);
 
+    screen::print(b"\nPCI - Loading PCI driver...", screen::VgaColor::LightMagenta);
+    pci::initialize();
+    screen::print(b"Loaded!", screen::VgaColor::Green);
+
     screen::print(b"\nHardDisk - Loading harddisk driver...", screen::VgaColor::LightMagenta);
     harddisk::initialize();
     screen::print(b" Loaded!", screen::VgaColor::Green);
 
     screen::print(b"\n\n>", screen::VgaColor::White);
 
-    loop {
-        unsafe {
+    unsafe {
+        sti();
+        loop {
             hlt();
         }
     }
