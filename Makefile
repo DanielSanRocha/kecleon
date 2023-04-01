@@ -6,48 +6,35 @@ help: # Show help for each of the Makefile recipes.
 lint: # lint rust code
 	cargo fmt
 
-setup: # Creates the iso file to mount with EXT2
-	mkdir -p tmp/boot/grub
+setup: # Mount disk.img on the tmp folder
+	mkdir -p tmp
+	sudo mount -o loop,offset=1048576 disk.img tmp
 
 clean: # Cleans the directory
+	sudo umount tmp || true
 	rm -rf kernel/*.o
 	rm -rf target/
-	rm -rf tmp
+	sudo rm -rf tmp
 	rm -f *.vdi
 	rm -f *.bin
-	rm -f *.img
+	rm -rf *.lock
+	rm -rf *.iso
+	rm -rf *.elf
+	rm -f out.bochs
 
 install: # Generate the iso image used by qemu
-	cp boot/grub.cfg tmp/boot/grub/
-	cp kernel.bin tmp/boot
-	grub-mkrescue -o disk.img tmp
+	sudo mkdir -p tmp/boot
+	sudo cp kernel.bin tmp/boot
 
-programs-i386: # Build and copy the programs to the loopback device
-	mkdir -p tmp/bin
-	gcc programs/shell/main.c -o programs/shell/shell
-	cp programs/shell/shell tmp/bin/shell
+build: ## Builds the kernel targetting the armv7 architecture
+	arm-none-eabi-as -march=armv7-a -mcpu=cortex-a7 kernel/main.s -o kernel/main_s.o
+	cross build --target arm-unknown-linux-gnueabi
+	arm-none-eabi-ld -T kernel/link.ld -o kernel.elf kernel/main_s.o -Ltarget/arm-unknown-linux-gnueabi/debug -lkecleon
+	arm-none-eabi-objcopy -O binary kernel.elf kernel.bin
 
-build-i386: programs-i386 ## Builds the kernel and all the programs to the i386 architecture
-	nasm -f elf32 kernel/main.asm -o kernel/main_asm.o
-	nasm -f elf32 kernel/gdt.asm -o kernel/gdt_asm.o
-	nasm -f elf32 kernel/idt.asm -o kernel/idt_asm.o
-	i686-linux-gnu-gcc -g -O -c kernel/memory.c -o kernel/memory_c.o
-	i686-linux-gnu-gcc -g -O -c kernel/idt.c -o kernel/idt_c.o
-	i686-linux-gnu-gcc -g -O -c kernel/gdt.c -o kernel/gdt_c.o
-	i686-linux-gnu-gcc -g -O -c kernel/harddisk.c -o kernel/harddisk_c.o
-	cargo build --target i686-unknown-linux-gnu
-	i686-linux-gnu-ld -T kernel/link-i386.ld -o kernel.bin -Ltarget/i686-unknown-linux-gnu/debug kernel/main_asm.o kernel/harddisk_c.o kernel/gdt_asm.o kernel/idt_asm.o kernel/idt_c.o kernel/memory_c.o kernel/gdt_c.o -lkecleon
+boot: build install ## Boots the kernel in a arm machine
+	qemu-system-arm -m 128M -M versatilepb -nographic -kernel kernel.bin -drive if=sd,cache=unsafe,file=disk.img -no-reboot -monitor telnet:127.0.0.1:1234,server,nowait -serial stdio
 
-boot-i386: build-i386 install ## Boots the kernel in a i386 machine
-	qemu-system-i386 -hda disk.img -no-reboot -m 1G -monitor stdio
+debug: build install ## Starts qemu in debug mode (gdb)
+	qemu-system-arm -s -S -m 128M -M versatilepb -nographic -kernel kernel.bin -no-reboot -serial stdio
 
-debug-i386: build-i386 install ## Starts qemu in debug mode (gdb)
-	qemu-system-i386 -s -S -hda disk.img -hdb disk.img -no-reboot -m 1G -monitor stdio -d trace:ide_*
-
-virtualbox: build-i386 install ## Create a vdi image with the kernel and programs
-	rm -f disk.vdi
-	VBoxManage convertfromraw --format VDI disk.img disk.vdi
-
-bochs: build-i386 install ## Run on bochs
-	cp disk.img hda.iso
-	bochs -f bochsrc.txt

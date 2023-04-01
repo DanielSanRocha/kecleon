@@ -1,16 +1,5 @@
 {
     "files.exclude": {
-        "**/*.o": true,
-        "**/*.a": true,
-        "**/*.bin": true,
-        "**/kernel-*": true,
-        "**/*.iso": true,
-        "**/*.img": true,
-        "**/*.vdi": true,
-        "**/*.lock": true,
-        "**/target/": true,
-        "**/tmp/": true,
-        "programs/shell/shell": true,
-        "**/out.bochs": true
+        "**/*.bin": true
     }
 }

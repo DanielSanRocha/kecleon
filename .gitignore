@@ -1,12 +1,14 @@
 *.o
 *.a
-*.bin
+kernel.bin
 kernel-*
 *.iso
-*.img
 *.vdi
 *.lock
 target/
 tmp/
 programs/shell/shell
 out.bochs
+*.elf
+!boot/u-boot.bin
+vmlinuz
