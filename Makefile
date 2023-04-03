@@ -27,14 +27,17 @@ install: # Generate the iso image used by qemu
 	sudo cp kernel.bin tmp/boot
 
 build: ## Builds the kernel targetting the armv7 architecture
-	arm-none-eabi-as -march=armv7-a -mcpu=cortex-a7 kernel/main.s -o kernel/main_s.o
-	cross build --target arm-unknown-linux-gnueabi
-	arm-none-eabi-ld -T kernel/link.ld -o kernel.elf kernel/main_s.o -Ltarget/arm-unknown-linux-gnueabi/debug -lkecleon
+	arm-none-eabi-as kernel/main.s -o kernel/main_s.o
+	arm-none-eabi-gcc -specs=nano.specs -specs=nosys.specs -ffreestanding -c kernel/mailbox.c -o kernel/mailbox_c.o
+	arm-none-eabi-gcc -specs=nano.specs -specs=nosys.specs -ffreestanding -c kernel/stdlib.c -o kernel/stdlib_c.o
+	arm-none-eabi-gcc -specs=nano.specs -specs=nosys.specs -ffreestanding -c kernel/framebuffer.c -o kernel/framebuffer_c.o
+	cargo build --target armv7a-none-eabi
+	arm-none-eabi-ld -T kernel/link.ld -o kernel.elf kernel/main_s.o kernel/framebuffer_c.o kernel/mailbox_c.o kernel/stdlib_c.o -Ltarget/armv7a-none-eabi/debug -lkecleon
 	arm-none-eabi-objcopy -O binary kernel.elf kernel.bin
 
 boot: build install ## Boots the kernel in a arm machine
-	qemu-system-arm -m 128M -M versatilepb -nographic -kernel kernel.bin -drive if=sd,cache=unsafe,file=disk.img -no-reboot -monitor telnet:127.0.0.1:1234,server,nowait -serial stdio
+	qemu-system-arm -m 128M -M raspi2 -kernel kernel.bin -drive if=sd,cache=unsafe,file=disk.img -no-reboot -monitor telnet:127.0.0.1:1234,server,nowait -serial stdio
 
 debug: build install ## Starts qemu in debug mode (gdb)
-	qemu-system-arm -s -S -m 128M -M versatilepb -nographic -kernel kernel.bin -no-reboot -serial stdio
+	qemu-system-arm -s -S -m 128M -M raspi2 -kernel kernel.bin -drive if=sd,cache=unsafe,file=disk.img -no-reboot -monitor telnet:127.0.0.1:1234,server,nowait -serial stdio
 

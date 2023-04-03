@@ -1,4 +1,4 @@
-const UART_DR: *mut u32 = 0x101f1000 as *mut u32;
+const UART_DR: *mut u32 = 0x3F201000 as *mut u32;
 
 use crate::memory;
 
@@ -10,8 +10,39 @@ pub fn get_char() -> u8 {
     memory::inq(UART_DR, 0) as u8
 }
 
+pub fn print_int(n: u32) {
+    let mut j = n;
+    let mut c = 0 as u8;
+    while j >= 10 {
+        j = j / 10;
+        c += 1;
+    }
+    print_int_loop(n, c + 1);
+}
+
 pub fn print(msg: &str) {
     for c in msg.chars() {
         print_char(c as u8);
+    }
+}
+
+fn print_int_loop(i: u32, count: u8) {
+    if count == 0 {
+        return;
+    }
+    let mut j = i;
+    let mut decimal = 1;
+    for _ in 0..count - 1 {
+        j = j / 10;
+        decimal *= 10;
+    }
+    print_char(48 + j as u8);
+    let new_i = i - decimal * j;
+    if new_i == 0 {
+        for _ in 0..count - 1 {
+            print_char('0' as u8);
+        }
+    } else {
+        print_int_loop(new_i, count - 1);
     }
 }

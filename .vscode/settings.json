@@ -1,5 +1,9 @@
 {
     "files.exclude": {
         "**/*.bin": true
+    },
+    "files.associations": {
+        "stdlib.h": "c",
+        "stdint.h": "c"
     }
 }
