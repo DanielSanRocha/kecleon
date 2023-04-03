@@ -1,20 +1,14 @@
 #include "stdlib.h"
 #include <stdint.h>
 
-// raspi model 1 does not have division instruction, so we need to define our own
-__inline__ uint32_t div(uint32_t dividend, uint32_t divisor) {
+uint32_t div(uint32_t dividend, uint32_t divisor) {
     return dividend / divisor;
 }
 
-__inline__ divmod_t divmod(uint32_t dividend, uint32_t divisor) {
+divmod_t divmod(uint32_t dividend, uint32_t divisor) {
     divmod_t res;
-#ifdef MODEL_1
-    res.div = div(dividend, divisor);
-    res.mod = dividend - res.div*divisor;
-#else
     res.div = dividend / divisor;
     res.mod = dividend % divisor;
-#endif
     return res;
 }
 

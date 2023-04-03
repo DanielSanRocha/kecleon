@@ -1,12 +1,12 @@
 ENTRY(start)
 SECTIONS
 {
+  _kernel = 0x0000;
  . = 0x10000;
- .startup . : { kernel/main_s.o(.text) }
  .text : { *(.text) }
  .data : { *(.data) }
  .bss : { *(.bss COMMON) }
  . = ALIGN(8);
- . = . + 0x1000; /* 4kB of stack memory */
+ . = . + 0x4000; /* 16kB of stack memory */
  stack_top = .;
 }

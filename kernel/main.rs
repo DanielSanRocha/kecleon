@@ -5,10 +5,12 @@
 pub mod memory;
 pub mod panic;
 pub mod screen;
+pub mod timer;
 pub mod uart;
 
 extern "C" {
-    pub fn framebuffer_initialize() -> u32;
+    fn framebuffer_initialize() -> u32;
+    // fn interrupts_initialize();
 }
 
 #[no_mangle]
@@ -28,8 +30,23 @@ pub extern "C" fn main() {
         screen::initialize(framebuffer);
         uart::print("\nInitialized!\n");
 
-        for c in "Hello World!".chars() {
-            screen::putc(c)
-        }
+        screen::print("Welcome to ", screen::RED);
+        screen::print("Kecleon", screen::GREEN);
+        screen::print(" OS!\n", screen::WHITE);
+
+        screen::print("Framebuffer location -> ", screen::WHITE);
+        screen::print_int(framebuffer as u32, screen::LIGHTBLUE);
+
+        screen::print("\n\n", screen::BLACK);
+
+        // screen::print("  Enabling Intererupts -> ", screen::LIGHTBLUE);
+        // interrupts_initialize();
+        // screen::print("Enabled!\n", screen::GREEN);
+
+        screen::print("  Initializing Timer   -> ", screen::LIGHTBLUE);
+        timer::initialize();
+        screen::print("Initialized!\n", screen::GREEN);
+
+        loop {}
     }
 }

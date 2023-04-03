@@ -1,9 +1,27 @@
 {
     "files.exclude": {
-        "**/*.bin": true
+        "**/*.bin": true,
+        "**/*.o": true,
+        "**/*.a": true,
+        "**/kernel.bin": true,
+        "**/kernel-*": true,
+        "**/*.iso": true,
+        "**/*.vdi": true,
+        "**/*.lock": true,
+        "**/target/": true,
+        "**/tmp/": true,
+        "programs/shell/shell": true,
+        "**/out.bochs": true,
+        "**/*.elf": true,
+        "boot/u-boot.bin": false,
+        "**/vmlinuz": true
     },
     "files.associations": {
         "stdlib.h": "c",
-        "stdint.h": "c"
+        "stdint.h": "c",
+        "interrupts.h": "c",
+        "timer.h": "c",
+        "peripheral.h": "c",
+        "cpuregs.h": "c"
     }
 }

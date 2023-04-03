@@ -1,10 +1,8 @@
 #include <stdint.h>
+#include "peripheral.h"
 
 #ifndef MAILBOX_H
 #define MAILBOX_H
-
-#define MAILBOX_OFFSET 0xB880
-#define PERIPHERAL_BASE 0x3F000000
 
 #define MAILBOX_BASE PERIPHERAL_BASE + MAILBOX_OFFSET
 #define MAIL0_READ (((mail_message_t *)(0x00 + MAILBOX_BASE)))
