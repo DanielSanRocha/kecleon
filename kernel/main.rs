@@ -28,7 +28,8 @@ pub extern "C" fn main() {
         screen::initialize(framebuffer);
         uart::print("\nInitialized!\n");
 
-        screen::draw_pixel(10, 10, &screen::Pixel {r: 255, g: 0, b: 0});
-
+        for c in "Hello World!".chars() {
+            screen::putc(c)
+        }
     }
 }
