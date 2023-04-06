@@ -28,16 +28,17 @@ install: # Generate the iso image used by qemu
 
 build: ## Builds the kernel targetting the armv7 architecture
 	arm-none-eabi-as -mcpu=cortex-a7 kernel/main.s -o kernel/main_s.o
-	arm-none-eabi-gcc -fpic -mcpu=cortex-a7 -ffreestanding -c kernel/mailbox.c -o kernel/mailbox_c.o
-	arm-none-eabi-gcc -fpic -mcpu=cortex-a7 -ffreestanding -c kernel/stdlib.c -o kernel/stdlib_c.o
-	arm-none-eabi-gcc -fpic -mcpu=cortex-a7 -ffreestanding -c kernel/framebuffer.c -o kernel/framebuffer_c.o
-	arm-none-eabi-gcc -fpic -mcpu=cortex-a7 -ffreestanding -c kernel/font.c -o kernel/font_c.o
+	arm-none-eabi-as -mcpu=cortex-a7 kernel/interrupts.s -o kernel/interrupts_s.o
+	arm-none-eabi-gcc -Wall -Werror -nostdlib -nostartfiles -fpic -mcpu=cortex-a7 -ffreestanding -c kernel/mailbox.c -o kernel/mailbox_c.o
+	arm-none-eabi-gcc -Wall -Werror -nostdlib -nostartfiles -fpic -mcpu=cortex-a7 -ffreestanding -c kernel/stdlib.c -o kernel/stdlib_c.o
+	arm-none-eabi-gcc -Wall -Werror -nostdlib -nostartfiles -fpic -mcpu=cortex-a7 -ffreestanding -c kernel/framebuffer.c -o kernel/framebuffer_c.o
+	arm-none-eabi-gcc -Wall -Werror -nostdlib -nostartfiles -fpic -mcpu=cortex-a7 -ffreestanding -c kernel/font.c -o kernel/font_c.o
 	cargo build --target armv7a-none-eabi
-	arm-none-eabi-ld -nostdlib -T kernel/link.ld -o kernel.elf kernel/main_s.o kernel/framebuffer_c.o kernel/font_c.o kernel/mailbox_c.o kernel/stdlib_c.o -Ltarget/armv7a-none-eabi/debug -lkecleon
+	arm-none-eabi-ld -nostdlib -T kernel/link.ld -o kernel.elf kernel/interrupts_s.o kernel/main_s.o kernel/framebuffer_c.o kernel/font_c.o kernel/mailbox_c.o kernel/stdlib_c.o -Ltarget/armv7a-none-eabi/debug -lkecleon
 	arm-none-eabi-objcopy -O binary kernel.elf kernel.bin
 
 boot: build install ## Boots the kernel in a arm machine
-	qemu-system-arm -d int -m 512M -smp 4 -M raspi2 -kernel kernel.bin -drive if=sd,cache=unsafe,file=disk.img -no-reboot -monitor telnet:127.0.0.1:1234,server,nowait -serial stdio
+	qemu-system-arm -d int -cpu arm1176 -M raspi2 -kernel kernel.bin -sd disk.img -no-reboot -monitor telnet:127.0.0.1:1234,server,nowait -serial stdio
 
 debug: build install ## Starts qemu in debug mode (gdb)
-	qemu-system-arm -d int -s -S -smp 4 -m 512M -M raspi2 -kernel kernel.bin -drive if=sd,cache=unsafe,file=disk.img -no-reboot -monitor telnet:127.0.0.1:1234,server,nowait -serial stdio
+	qemu-system-arm -s -S -d int -cpu arm1176 -M raspi2 -kernel kernel.bin -sd disk.img -no-reboot -serial stdio

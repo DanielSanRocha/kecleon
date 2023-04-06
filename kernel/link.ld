@@ -1,12 +1,12 @@
-ENTRY(start)
-SECTIONS
-{
-  _kernel = 0x0000;
- . = 0x10000;
- .text : { *(.text) }
- .data : { *(.data) }
- .bss : { *(.bss COMMON) }
- . = ALIGN(8);
- . = . + 0x4000; /* 16kB of stack memory */
- stack_top = .;
+MEMORY {
+    ram : ORIGIN = 0x10000, LENGTH = 0x100000
+}
+
+SECTIONS {
+    .text : { *(.text*) } > ram
+    .bss : { *(.bss*) } > ram
+     . = . + 0x4000; /* 16kB of stack memory */
+    stack_top = .;
+    . = . + 0x1000;
+    stack_irq_top = .;
 }

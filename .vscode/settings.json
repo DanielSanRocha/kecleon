@@ -22,6 +22,7 @@
         "interrupts.h": "c",
         "timer.h": "c",
         "peripheral.h": "c",
-        "cpuregs.h": "c"
+        "cpuregs.h": "c",
+        "armtimer.h": "c"
     }
 }

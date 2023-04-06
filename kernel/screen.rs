@@ -104,7 +104,7 @@ pub fn putc(c: char, color: &Pixel) {
         }
 
         CURRENT_X += 1;
-        if CURRENT_X >= SCREEN_WIDTH/16 {
+        if CURRENT_X >= SCREEN_WIDTH / 16 {
             CURRENT_X = 0;
             CURRENT_Y += 1;
         }
