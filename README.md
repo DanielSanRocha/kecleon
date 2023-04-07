@@ -12,11 +12,8 @@ Part of the code was copied from https://github.com/jsandler18/raspi-kernel. Che
 
 ## Setup
 
-You need to have `Rust + Cargo` working in your machine which wil not be covered in this tutorial. You also will need `qemu`, ensure you have the command `qemu-system-arm` in your machine. On Ubuntu you can install those with the commands:
+You need to have `Rust + Cargo` working in your machine which wil not be covered in this tutorial. You also will need `qemu`, ensure you have the command `qemu-system-arm` with at least version 7 in your machine.
 
-```bash
-sudo apt install qemu
-```
 After that, run
 ```bash
 make setup

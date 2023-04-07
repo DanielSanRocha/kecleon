@@ -11,6 +11,7 @@ pub mod uart;
 
 extern "C" {
     fn framebuffer_initialize() -> u32;
+    fn hang();
 }
 
 #[no_mangle]
@@ -48,6 +49,6 @@ pub extern "C" fn main() {
         timer::initialize();
         screen::print("Initialized!\n", screen::GREEN);
 
-        loop {}
+        hang();
     }
 }

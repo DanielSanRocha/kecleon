@@ -32,12 +32,6 @@ move_vector_table:
     ldmia r0!,{r2,r3,r4,r5,r6,r7,r8,r9}
     stmia r1!,{r2,r3,r4,r5,r6,r7,r8,r9}
 
-    @ cps #0x12 //change to IRQ mode
-    @ ldr sp, =stack_irq_top
-
-    @ cps #0x13
-    @ ldr sp, =stack_top
-
     pop {r0-r9}
     bx  lr
 
@@ -46,8 +40,10 @@ enable_interrupts:
     cpsie i
     bx lr
 
+.global hang
 hang:
-    b .
+    wfi
+    b hang
 
 .extern irq_handler
 irq:
@@ -55,4 +51,3 @@ irq:
     bl irq_handler
     pop  {r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,lr}
     subs pc,lr,#4
-    @ eret

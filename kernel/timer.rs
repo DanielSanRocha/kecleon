@@ -1,13 +1,20 @@
 use crate::screen;
 use crate::memory;
 
-const SYSTEM_TIMER_REGISTER: *mut u32 = 0x3F00B408 as *mut u32;
+const SYSTEM_TIMER_REGISTER: *mut u32 = 0x3F003000 as *mut u32;
 
 pub fn initialize() {
-    memory::outq(SYSTEM_TIMER_REGISTER,0x00F90000,0);
-    memory::outq(SYSTEM_TIMER_REGISTER,0x00F90200,0);
+    let x0 = memory::inq(SYSTEM_TIMER_REGISTER, 1);
+    screen::print_int(x0, screen::LIGHTRED);
+
+    memory::outq(SYSTEM_TIMER_REGISTER,x0 + 10000,4);
 }
 
 pub fn handler() {
-    screen::print("Fired!", screen::RED);
+    memory::outq(SYSTEM_TIMER_REGISTER, 2, 0);
+
+    let x0 = memory::inq(SYSTEM_TIMER_REGISTER, 1);
+    memory::outq(SYSTEM_TIMER_REGISTER,x0 + 10000,4);
+
+    screen::print("Fire!", screen::RED);
 }
