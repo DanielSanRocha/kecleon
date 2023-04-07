@@ -25,6 +25,7 @@
         "peripheral.h": "c",
         "cpuregs.h": "c",
         "armtimer.h": "c",
-        "mailbox.h": "c"
+        "mailbox.h": "c",
+        "emmc.h": "c"
     }
 }

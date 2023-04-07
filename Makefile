@@ -22,9 +22,7 @@ lint: # lint rust code
 
 setup: # Mount disk.img on the tmp folder
 	mkdir -p tmp
-	mkdir -p boot
-	# sudo mount -o loop,offset=1048576 disk.img boot
-	sudo mount -o loop,offset=34603008 disk.img tmp
+	sudo mount -o loop,offset=1048576 disk.img tmp
 
 clean: # Cleans the directory
 	sudo umount tmp || true
@@ -39,8 +37,8 @@ clean: # Cleans the directory
 	rm -f out.bochs
 
 install: # Generate the iso image used by qemu
-	sudo mkdir -p boot/boot
-	sudo cp kernel.bin boot/boot
+	sudo mkdir -p tmp/boot
+	sudo cp kernel.bin tmp/boot
 
 build: ## Builds the kernel targetting the armv7 architecture
 	$(AS) $(AS_PARAMS) kernel/main.s -o kernel/main_s.o
@@ -50,8 +48,10 @@ build: ## Builds the kernel targetting the armv7 architecture
 	$(CC) $(CC_PARAMS) -c kernel/stdlib.c -o kernel/stdlib_c.o
 	$(CC) $(CC_PARAMS) -c kernel/framebuffer.c -o kernel/framebuffer_c.o
 	$(CC) $(CC_PARAMS) -c kernel/font.c -o kernel/font_c.o
+	$(CC) $(CC_PARAMS) -c kernel/delays.c -o kernel/delays_c.o
+	$(CC) $(CC_PARAMS) -c kernel/emmc.c -o kernel/emmc_c.o
 	$(CARGO) build --target $(CARGO_TARGET)
-	$(LD) -nostdlib -T kernel/link.ld -o kernel.elf kernel/interrupts_s.o kernel/main_s.o kernel/memory_s.o kernel/framebuffer_c.o kernel/font_c.o kernel/mailbox_c.o kernel/stdlib_c.o -Ltarget/$(CARGO_TARGET)/debug -lkecleon
+	$(LD) -nostdlib -T kernel/link.ld -o kernel.elf kernel/interrupts_s.o kernel/main_s.o kernel/memory_s.o kernel/framebuffer_c.o kernel/font_c.o kernel/mailbox_c.o kernel/stdlib_c.o kernel/emmc_c.o kernel/delays_c.o -Ltarget/$(CARGO_TARGET)/debug -lkecleon
 	$(OBJCOPY) -O binary kernel.elf kernel.bin
 
 boot: build install ## Boots the kernel in a arm machine

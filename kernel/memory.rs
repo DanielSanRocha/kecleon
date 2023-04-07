@@ -22,7 +22,9 @@ pub fn inq(reg: *mut u32, offset: isize) -> u32 {
 
 pub fn memcopy(source: *mut u8, dest: *mut u8, size: isize) {
     for i in 0..size {
-        unsafe{ *dest.offset(i) = *source.offset(i); }
+        unsafe {
+            *dest.offset(i) = *source.offset(i);
+        }
     }
 }
 

@@ -141,7 +141,11 @@ pub fn putc(c: char, color: &Pixel) {
 
 fn scroll() {
     unsafe {
-        memory::memcopy(FRAMEBUFFER.offset(3 * SCREEN_WIDTH * 16), FRAMEBUFFER,3 * (SCREEN_HEIGHT -1) * SCREEN_WIDTH)
+        memory::memcopy(
+            FRAMEBUFFER.offset(3 * SCREEN_WIDTH * 16),
+            FRAMEBUFFER,
+            3 * (SCREEN_HEIGHT - 1) * SCREEN_WIDTH,
+        )
     }
 }
 
