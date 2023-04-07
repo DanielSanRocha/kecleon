@@ -22,11 +22,14 @@ lint: # lint rust code
 
 setup: # Mount disk.img on the tmp folder
 	mkdir -p tmp
-	sudo mount -o loop,offset=1048576 disk.img tmp
+	dd if=/dev/zero of=disk.img bs=1M count=32
+	mkfs.ext2 -b 1024 disk.img
+	sudo mount -o loop,offset=0 disk.img tmp
 
 clean: # Cleans the directory
 	sudo umount tmp || true
 	rm -rf kernel/*.o
+	rm -rf disk.img
 	rm -rf target/
 	sudo rm -rf tmp
 	rm -f *.vdi

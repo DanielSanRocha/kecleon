@@ -9,6 +9,7 @@ pub mod panic;
 pub mod screen;
 pub mod timer;
 pub mod uart;
+pub mod filesystem;
 
 extern "C" {
     fn framebuffer_initialize() -> u32;
@@ -62,14 +63,8 @@ pub extern "C" fn main() {
         emmc::initialize();
         screen::print("Intialized!\n", screen::GREEN);
 
-        for i in 1..=50 {
-            fire(i);
-            timer::sleep(1000 * 90);
-        }
+        screen::print("  Intializing File System -> ", screen::LIGHTBLUE);
+        filesystem::initialize();
+        screen::print("Initialized!\n", screen::GREEN);
     }
-}
-
-fn fire(i: u32) {
-    screen::print_int(i, screen::LIGHTRED);
-    screen::print(" Fired!\n", screen::ORANGE);
 }

@@ -62,6 +62,19 @@ pub fn print(s: &str, color: Pixel) {
     }
 }
 
+pub fn print_string(s: *const u8, color: Pixel) {
+    let mut i = 0 as isize;
+    loop {
+        unsafe {
+            let c = *s.offset(i) as char;
+            if c == '\0' { break; }
+
+            putc(c, &color);
+            i += 1;
+        }
+    }
+}
+
 pub fn print_int(n: u32, color: Pixel) {
     let mut j = n;
     let mut c = 0 as u8;

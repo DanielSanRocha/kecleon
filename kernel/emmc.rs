@@ -17,3 +17,7 @@ pub fn initialize() {
         }
     }
 }
+
+pub fn readblock(lba: u32, buffer: *mut u8, num: u32) {
+    unsafe { sd_readblock(lba, buffer, num) }
+}
