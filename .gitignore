@@ -12,3 +12,5 @@ out.bochs
 *.elf
 !boot/u-boot.bin
 vmlinuz
+boot/
+disk.img

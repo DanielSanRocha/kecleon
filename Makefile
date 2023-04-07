@@ -22,7 +22,9 @@ lint: # lint rust code
 
 setup: # Mount disk.img on the tmp folder
 	mkdir -p tmp
-	sudo mount -o loop,offset=1048576 disk.img tmp
+	mkdir -p boot
+	# sudo mount -o loop,offset=1048576 disk.img boot
+	sudo mount -o loop,offset=34603008 disk.img tmp
 
 clean: # Cleans the directory
 	sudo umount tmp || true
@@ -37,8 +39,8 @@ clean: # Cleans the directory
 	rm -f out.bochs
 
 install: # Generate the iso image used by qemu
-	sudo mkdir -p tmp/boot
-	sudo cp kernel.bin tmp/boot
+	sudo mkdir -p boot/boot
+	sudo cp kernel.bin boot/boot
 
 build: ## Builds the kernel targetting the armv7 architecture
 	$(AS) $(AS_PARAMS) kernel/main.s -o kernel/main_s.o

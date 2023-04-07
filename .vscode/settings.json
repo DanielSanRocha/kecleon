@@ -14,7 +14,8 @@
         "**/out.bochs": true,
         "**/*.elf": true,
         "boot/u-boot.bin": false,
-        "**/vmlinuz": true
+        "**/vmlinuz": true,
+        "**/boot/": true
     },
     "files.associations": {
         "stdlib.h": "c",
@@ -23,6 +24,7 @@
         "timer.h": "c",
         "peripheral.h": "c",
         "cpuregs.h": "c",
-        "armtimer.h": "c"
+        "armtimer.h": "c",
+        "mailbox.h": "c"
     }
 }

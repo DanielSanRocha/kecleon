@@ -2,6 +2,7 @@
 #![feature(core_intrinsics, lang_items)]
 #![feature(panic_info_message)]
 
+pub mod emmc;
 pub mod interrupts;
 pub mod memory;
 pub mod panic;
@@ -21,7 +22,7 @@ pub extern "C" fn main() {
 
         uart::print("  Enabling MMU -> ");
         memory::initialize();
-        uart::print("Enabled!\n");
+        uart::print("\nEnabled!\n");
 
         uart::print("Initializing framebuffer...");
         let framebuffer = framebuffer_initialize() as *mut u8;
@@ -57,7 +58,18 @@ pub extern "C" fn main() {
         timer::schedule(screen::blink_cursor, 500 * 1000);
         screen::print("Blinking!\n", screen::GREEN);
 
-        screen::print("\n>", screen::ORANGE);
-        hang();
+        screen::print("  Intializing EMMC     -> ", screen::LIGHTBLUE);
+        emmc::initialize();
+        screen::print("Intialized!\n", screen::GREEN);
+
+        for i in 1..=50 {
+            fire(i);
+            timer::sleep(1000 * 90);
+        }
     }
+}
+
+fn fire(i: u32) {
+    screen::print_int(i, screen::LIGHTRED);
+    screen::print(" Fired!\n", screen::ORANGE);
 }

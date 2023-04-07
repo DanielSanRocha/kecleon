@@ -20,6 +20,12 @@ pub fn inq(reg: *mut u32, offset: isize) -> u32 {
     unsafe { *reg.offset(offset) }
 }
 
+pub fn memcopy(source: *mut u8, dest: *mut u8, size: isize) {
+    for i in 0..size {
+        unsafe{ *dest.offset(i) = *source.offset(i); }
+    }
+}
+
 pub fn invalidate() {
     unsafe { invalidate_tlbs() }
 }
@@ -28,9 +34,22 @@ pub fn initialize() {
     unsafe {
         MMUTABLEBASE = malloc(4096 * 4);
 
-        for i in 0..=4095 {
-            section(i * 1024 * 1024, i * 1024 * 1024, 0x0000);
-        }
+        section(0x0, 0x0, 0x0);
+        section(0x100000, 0x100000, 0x0000);
+        section(0x200000, 0x200000, 0x0000);
+        section(0x300000, 0x300000, 0x0000);
+
+        section(0x3F000000, 0x3F000000, 0x0000);
+        section(0x3F200000, 0x3F200000, 0x0000);
+        section(0x3F300000, 0x3F300000, 0x0);
+
+        section(0x3C100000, 0x3C100000, 0x0);
+        section(0x3C200000, 0x3C200000, 0x0);
+        section(0x3C300000, 0x3C300000, 0x0);
+        section(0x3C400000, 0x3C400000, 0x0);
+        section(0x3C500000, 0x3C500000, 0x0);
+        section(0x3C600000, 0x3C600000, 0x0);
+        section(0x3C700000, 0x3C700000, 0x0);
 
         start_mmu(MMUTABLEBASE);
         invalidate();

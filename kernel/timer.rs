@@ -50,6 +50,16 @@ pub fn schedule(handler: fn(deltatime: u32) -> (), interval: u32) {
     }
 }
 
+pub fn sleep(time: u32) {
+    let t0 = memory::inq(SYSTEM_TIMER_REGISTER, 1);
+
+    loop {
+        if memory::inq(SYSTEM_TIMER_REGISTER, 1) - t0 > time {
+            break;
+        }
+    }
+}
+
 pub fn current() -> u32 {
     memory::inq(SYSTEM_TIMER_REGISTER, 1)
 }

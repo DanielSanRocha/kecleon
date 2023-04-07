@@ -1,9 +1,12 @@
+use crate::memory;
+
 static mut FRAMEBUFFER: *mut u8 = 0x0 as *mut u8;
 
 static mut CURRENT_X: isize = 0;
 static mut CURRENT_Y: isize = 0;
 
 static SCREEN_WIDTH: isize = 1600;
+static SCREEN_HEIGHT: isize = 900;
 
 extern "C" {
     pub fn font(c: u8) -> *const u8;
@@ -97,7 +100,11 @@ pub fn putc(c: char, color: &Pixel) {
         if c == '\n' {
             CURRENT_X = 0;
             CURRENT_Y += 1;
-            return;
+
+            if CURRENT_Y > SCREEN_HEIGHT / 16 - 2 {
+                CURRENT_Y -= 1;
+                scroll();
+            }
         }
 
         let bmp = font(c as u8);
@@ -124,6 +131,17 @@ pub fn putc(c: char, color: &Pixel) {
             CURRENT_X = 0;
             CURRENT_Y += 1;
         }
+
+        if CURRENT_Y > SCREEN_HEIGHT / 16 - 2 {
+            CURRENT_Y -= 1;
+            scroll();
+        }
+    }
+}
+
+fn scroll() {
+    unsafe {
+        memory::memcopy(FRAMEBUFFER.offset(3 * SCREEN_WIDTH * 16), FRAMEBUFFER,3 * (SCREEN_HEIGHT -1) * SCREEN_WIDTH)
     }
 }
 
