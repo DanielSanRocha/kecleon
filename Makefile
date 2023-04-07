@@ -42,13 +42,14 @@ install: # Generate the iso image used by qemu
 
 build: ## Builds the kernel targetting the armv7 architecture
 	$(AS) $(AS_PARAMS) kernel/main.s -o kernel/main_s.o
+	$(AS) $(AS_PARAMS) kernel/memory.s -o kernel/memory_s.o
 	$(AS) $(AS_PARAMS) kernel/interrupts.s -o kernel/interrupts_s.o
 	$(CC) $(CC_PARAMS) -c kernel/mailbox.c -o kernel/mailbox_c.o
 	$(CC) $(CC_PARAMS) -c kernel/stdlib.c -o kernel/stdlib_c.o
 	$(CC) $(CC_PARAMS) -c kernel/framebuffer.c -o kernel/framebuffer_c.o
 	$(CC) $(CC_PARAMS) -c kernel/font.c -o kernel/font_c.o
 	$(CARGO) build --target $(CARGO_TARGET)
-	$(LD) -nostdlib -T kernel/link.ld -o kernel.elf kernel/interrupts_s.o kernel/main_s.o kernel/framebuffer_c.o kernel/font_c.o kernel/mailbox_c.o kernel/stdlib_c.o -Ltarget/$(CARGO_TARGET)/debug -lkecleon
+	$(LD) -nostdlib -T kernel/link.ld -o kernel.elf kernel/interrupts_s.o kernel/main_s.o kernel/memory_s.o kernel/framebuffer_c.o kernel/font_c.o kernel/mailbox_c.o kernel/stdlib_c.o -Ltarget/$(CARGO_TARGET)/debug -lkecleon
 	$(OBJCOPY) -O binary kernel.elf kernel.bin
 
 boot: build install ## Boots the kernel in a arm machine

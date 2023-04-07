@@ -5,7 +5,7 @@ MEMORY {
 SECTIONS {
     .text : { *(.text*) } > ram
     .bss : { *(.bss*) } > ram
-     . = . + 0x4000; /* 16kB of stack memory */
+     . = . + 0x4000;
     stack_top = .;
     . = . + 0x1000;
     stack_irq_top = .;

@@ -41,7 +41,7 @@ pub const WHITE: Pixel = Pixel { r: 255, g: 255, b: 255 };
 pub const BLACK: Pixel = Pixel { r: 0, g: 0, b: 0 };
 pub const LIGHTBLUE: Pixel = Pixel { r: 100, g: 100, b: 255 };
 pub const LIGHTRED: Pixel = Pixel { r: 200, g: 100, b: 100 };
-pub const ORANGE: Pixel = Pixel {r: 219, g: 123, b: 65};
+pub const ORANGE: Pixel = Pixel { r: 219, g: 123, b: 65 };
 
 pub fn draw_pixel(x: isize, y: isize, pix: &Pixel) {
     unsafe {

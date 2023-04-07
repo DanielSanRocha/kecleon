@@ -19,6 +19,10 @@ pub extern "C" fn main() {
     unsafe {
         uart::print("Starting Kernel...\n");
 
+        uart::print("  Enabling MMU -> ");
+        memory::initialize();
+        uart::print("Enabled!\n");
+
         uart::print("Initializing framebuffer...");
         let framebuffer = framebuffer_initialize() as *mut u8;
 
@@ -57,4 +61,3 @@ pub extern "C" fn main() {
         hang();
     }
 }
-

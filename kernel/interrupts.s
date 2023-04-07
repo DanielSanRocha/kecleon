@@ -2,6 +2,14 @@
 .extern start
 .extern stack_top
 
+.extern undefined_handler
+.extern swi_handler
+.extern prefetch_handler
+.extern data_handler
+.extern unused_handler
+.extern fiq_handler
+.extern irq_handler
+
 vector_table:
     ldr pc,reset_handler_ptr
     ldr pc,undefined_handler_ptr
@@ -13,13 +21,13 @@ vector_table:
     ldr pc,fiq_handler_ptr
 
 reset_handler_ptr:      .word start
-undefined_handler_ptr:  .word hang
-swi_handler_ptr:        .word hang
-prefetch_handler_ptr:   .word hang
-data_handler_ptr:       .word hang
-unused_handler_ptr:     .word hang
+undefined_handler_ptr:  .word undefined_handler
+swi_handler_ptr:        .word swi_handler
+prefetch_handler_ptr:   .word prefetch_handler
+data_handler_ptr:       .word data_handler
+unused_handler_ptr:     .word unused_handler
 irq_handler_ptr:        .word irq
-fiq_handler_ptr:        .word hang
+fiq_handler_ptr:        .word fiq_handler
 
 .global move_vector_table
 move_vector_table:

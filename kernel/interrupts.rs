@@ -29,3 +29,33 @@ pub fn enable() {
         enable_interrupts();
     }
 }
+
+#[no_mangle]
+extern "C" fn undefined_handler() {
+    panic!("Undefined Handler Called!");
+}
+
+#[no_mangle]
+extern "C" fn swi_handler() {
+    panic!("Swi Handler Called!");
+}
+
+#[no_mangle]
+extern "C" fn prefetch_handler() {
+    panic!("Prefetch Handler Called!");
+}
+
+#[no_mangle]
+extern "C" fn data_handler() {
+    panic!("Data Handler Handler Called!");
+}
+
+#[no_mangle]
+extern "C" fn unused_handler() {
+    panic!("Unused Handler Called!");
+}
+
+#[no_mangle]
+extern "C" fn fiq_handler() {
+    panic!("FIQ Handler Called!");
+}

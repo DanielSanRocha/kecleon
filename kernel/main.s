@@ -12,6 +12,10 @@ start:
 
     LDR sp, =stack_top
 
+    mcr p15, 0, r0, c8, c7, 0  @ TLBIALL: invalidate all TLBs
+    mcr p15, 0, r0, c7, c5, 1  @ ICIALLU: invalidate instruction cache
+    dsb                        @ ensure invalidations have completed
+
     mcr p15,0,r0,c2,c0,0
 
     BL main
