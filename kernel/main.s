@@ -1,3 +1,5 @@
+#include "mmu.h"
+
 .extern main
 .global start
 
@@ -9,6 +11,9 @@ start:
     ldr sp, =stack_top
 
     LDR sp, =stack_top
+
+    mcr p15,0,r0,c2,c0,0
+
     BL main
     B .
 

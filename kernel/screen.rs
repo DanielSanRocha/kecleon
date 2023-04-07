@@ -21,6 +21,19 @@ pub fn initialize(framebuffer: *mut u8) {
     }
 }
 
+static mut CURSOR_VISIBLE: u8 = 1;
+pub fn blink_cursor(_deltatime: u32) {
+    unsafe {
+        if CURSOR_VISIBLE == 1 {
+            draw_cursor(&WHITE);
+        } else {
+            draw_cursor(&BLACK);
+        }
+
+        CURSOR_VISIBLE = if CURSOR_VISIBLE == 0 { 1 } else { 0 };
+    }
+}
+
 pub const RED: Pixel = Pixel { r: 255, g: 0, b: 0 };
 pub const GREEN: Pixel = Pixel { r: 0, g: 255, b: 0 };
 pub const BLUE: Pixel = Pixel { r: 0, g: 0, b: 255 };
@@ -28,6 +41,7 @@ pub const WHITE: Pixel = Pixel { r: 255, g: 255, b: 255 };
 pub const BLACK: Pixel = Pixel { r: 0, g: 0, b: 0 };
 pub const LIGHTBLUE: Pixel = Pixel { r: 100, g: 100, b: 255 };
 pub const LIGHTRED: Pixel = Pixel { r: 200, g: 100, b: 100 };
+pub const ORANGE: Pixel = Pixel {r: 219, g: 123, b: 65};
 
 pub fn draw_pixel(x: isize, y: isize, pix: &Pixel) {
     unsafe {
@@ -78,6 +92,8 @@ fn print_int_loop(i: u32, count: u8, color: &Pixel) {
 
 pub fn putc(c: char, color: &Pixel) {
     unsafe {
+        draw_cursor(&BLACK);
+
         if c == '\n' {
             CURRENT_X = 0;
             CURRENT_Y += 1;
@@ -107,6 +123,16 @@ pub fn putc(c: char, color: &Pixel) {
         if CURRENT_X >= SCREEN_WIDTH / 16 {
             CURRENT_X = 0;
             CURRENT_Y += 1;
+        }
+    }
+}
+
+fn draw_cursor(color: &Pixel) {
+    unsafe {
+        for i in 0..=16 {
+            for j in 16..=19 {
+                draw_pixel(CURRENT_X * 16 + i, CURRENT_Y * 16 + j, &color);
+            }
         }
     }
 }

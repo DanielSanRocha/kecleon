@@ -49,6 +49,12 @@ pub extern "C" fn main() {
         timer::initialize();
         screen::print("Initialized!\n", screen::GREEN);
 
+        screen::print("  Blinking the cursor  -> ", screen::LIGHTBLUE);
+        timer::schedule(screen::blink_cursor, 500 * 1000);
+        screen::print("Blinking!\n", screen::GREEN);
+
+        screen::print("\n>", screen::ORANGE);
         hang();
     }
 }
+

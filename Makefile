@@ -52,7 +52,7 @@ build: ## Builds the kernel targetting the armv7 architecture
 	$(OBJCOPY) -O binary kernel.elf kernel.bin
 
 boot: build install ## Boots the kernel in a arm machine
-	qemu-system-arm -d trace:bcm2835_systmr* -cpu arm1176 -M raspi2b -kernel kernel.bin -sd disk.img -no-reboot -monitor telnet:127.0.0.1:1234,server,nowait -serial stdio
+	qemu-system-arm -cpu arm1176 -M raspi2b -kernel kernel.bin -sd disk.img -no-reboot -monitor telnet:127.0.0.1:1234,server,nowait -serial stdio
 
 debug: build install ## Starts qemu in debug mode (gdb)
 	qemu-system-arm -s -S -d trace:bcm2835_* -cpu arm1176 -M raspi2b -kernel kernel.bin -sd disk.img -no-reboot -serial stdio
