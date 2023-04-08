@@ -1,102 +1,91 @@
-use crate::emmc;
+use crate::ext2;
 use crate::memory;
 use crate::screen;
 
-#[derive(Clone, Copy)]
-struct Ext2SuperBlock {
-    number_inodes: u32,
-    number_blocks: u32,
-    reserved_blocks: u32,
-    unallocated_blocks: u32,
-    unallocated_inodes: u32,
-    start_superblock: u32,
-    lblock_size: u32,
-    lfragment_size: u32,
-    block_per_group: u32,
-    fragments_per_group: u32,
-    inodes_per_group: u32,
-    garbage: [u8; 12],
-    magic_number: u16
-}
-
-#[derive(Clone, Copy)]
-struct Ext2BlockGroupDescriptor {
-    block_bitmap: u32,
-    inode_bitmap: u32,
-    inode_table: u32,
-    garbage: [u8; 20]
-}
-
 #[repr(packed)]
 #[derive(Clone, Copy)]
-struct Ext2Inode {
-    permission: u16,
-    user: u16,
-    lower_size: u32,
-    last_access: u32,
-    creation_time: u32,
-    modification_time: u32,
-    deletion_time: u32,
-    group: u16,
-    hard_links: u16,
-    sectors_number: u32,
-    flags: u32,
-    garbage1: u32,
-    dbp0: u32,
-    dbp1: u32,
-    dbp2: u32,
-    dbp3: u32,
-    dbp4: u32,
-    dbp5: u32,
-    dbp6: u32,
-    dbp7: u32,
-    dbp8: u32,
-    dbp9: u32,
-    dbp10: u32,
-    dbp11: u32,
-    garbage2: [u8; 40]
+struct File {
+    id: u16,
+    inode: u32,
+    process: u16,
+    offset: u32,
 }
 
-static mut SUPERBLOCK: *const Ext2SuperBlock = 0x0 as *const Ext2SuperBlock;
-static mut BGD: *const Ext2BlockGroupDescriptor = 0x0 as *const Ext2BlockGroupDescriptor;
-static mut BUFFER: *mut u8 = 0x0 as *mut u8;
+static mut FILES: *mut File = 0x0 as *mut File;
+static mut INODE_BUFFER: *mut ext2::Inode = 0x0 as *mut ext2::Inode;
+static mut BLOCK_BUFFER: *mut u8 = 0x0 as *mut u8;
 
 pub fn initialize() {
+    ext2::initialize();
     unsafe {
-        SUPERBLOCK = memory::malloc(1024) as *const Ext2SuperBlock;
-        emmc::readblock(2, SUPERBLOCK as *mut u8, 2);
+        FILES = memory::malloc(12 * 256) as *mut File;
+        INODE_BUFFER = memory::malloc(128) as *mut ext2::Inode;
+        BLOCK_BUFFER = memory::malloc(1024) as *mut u8;
+    }
+}
 
-        if (*SUPERBLOCK).magic_number != 0xef53 {
-            panic!("Wrong magic number for Ext2!!");
+pub fn open(path: &str, process: u16) -> u16 {
+    unsafe {
+        if path.len() == 0 {
+            panic!("Trying to open file with empty name!");
         }
 
-        BGD = memory::malloc(32 * 32) as *const Ext2BlockGroupDescriptor;
-        emmc::readblock(4, BGD as *mut u8, 2);
+        if path.as_bytes()[0] != '/' as u8 {
+            panic!("Path must start  with a backslash '/'!");
+        }
 
-        BUFFER = memory::malloc(1024) as *mut u8;
-        let root: *mut Ext2Inode = memory::malloc(128) as *mut Ext2Inode;
-        read_inode(2, root);
+        let inode_number = open_recursion(2, &path[1..path.len()]);
 
-        emmc::readblock(2 * (*root).dbp0, BUFFER, 2);
+        inode_number as u16
+    }
+}
 
-        for i in 0..=255 {
-            let c = *BUFFER.offset(i) as char;
-            screen::putc(c, &screen::WHITE);
+fn open_recursion(root: u32, path: &str) -> u16 {
+    unsafe {
+        ext2::get_inode(root, INODE_BUFFER);
+        ext2::read_inode(INODE_BUFFER, BLOCK_BUFFER);
+
+        if (*INODE_BUFFER).permission & 0x4000 == 0 {
+            return 0;
+        }
+
+        let mut i = 0;
+        loop {
+            let inode = *(BLOCK_BUFFER.offset(i) as *mut u32);
+            if inode == 0 {
+                return 0;
+            }
+
+            let namesize = *BLOCK_BUFFER.offset(i + 6);
+            let mut flag = 1 as u8;
+
+            if path.len() >= namesize as usize {
+                for j in 0..namesize {
+                    let c = *BLOCK_BUFFER.offset(8 + j as isize + i as isize) as char;
+                    if path.as_bytes()[j as usize] != c as u8 {
+                        flag = 0;
+                        break;
+                    }
+                }
+
+                if flag == 1 {
+                    if namesize == path.len() as u8 {
+                        return create_fd(inode);
+                    }
+
+                    if path.as_bytes()[namesize as usize] == '/' as u8 {
+                        let new_path = &path[(namesize as usize + 1)..path.len()];
+                        return open_recursion(inode, new_path);
+                    }
+                }
+            }
+
+            let entrysize: u16 = *(BLOCK_BUFFER.offset(i) as *mut u16).offset(2);
+            i += entrysize as isize;
         }
     }
 }
 
-fn read_inode(number: u32, inode: *mut Ext2Inode) {
-    unsafe {
-        let group = (number - 1) / (*SUPERBLOCK).inodes_per_group;
-        let index = (number - 1) % (*SUPERBLOCK).inodes_per_group;
-        let block = (index * 128) / 1024;
+fn create_fd(inode: u32) -> u16 {
 
-        let bgd = *BGD.offset(group as isize);
-
-        emmc::readblock(2 * bgd.inode_table + 2 * block, BUFFER, 2);
-
-        let inodes: *mut Ext2Inode = BUFFER as *mut Ext2Inode;
-        *inode = *inodes.offset(index as isize);
-    }
 }

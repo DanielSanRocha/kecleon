@@ -1,4 +1,4 @@
-.PHONY: help, build, boot, bootimage
+.PHONY: help, build, boot, bootimage, programs
 
 PREFIX = arm-none-eabi
 
@@ -39,9 +39,15 @@ clean: # Cleans the directory
 	rm -rf *.elf
 	rm -f out.bochs
 
+programs: # Build the programs (shell, lib)
+	cd programs/shell && $(CARGO) build --target $(CARGO_TARGET)
+	cd programs/shell && $(LD) -nostdlib -T ../link.ld -o shell -Ltarget/$(CARGO_TARGET)/debug -lshell
+
 install: # Generate the iso image used by qemu
 	sudo mkdir -p tmp/boot
 	sudo cp kernel.bin tmp/boot
+	sudo mkdir -p tmp/bin
+	sudo cp programs/shell/shell tmp/bin
 
 build: ## Builds the kernel targetting the armv7 architecture
 	$(AS) $(AS_PARAMS) kernel/main.s -o kernel/main_s.o
@@ -57,7 +63,7 @@ build: ## Builds the kernel targetting the armv7 architecture
 	$(LD) -nostdlib -T kernel/link.ld -o kernel.elf kernel/interrupts_s.o kernel/main_s.o kernel/memory_s.o kernel/framebuffer_c.o kernel/font_c.o kernel/mailbox_c.o kernel/stdlib_c.o kernel/emmc_c.o kernel/delays_c.o -Ltarget/$(CARGO_TARGET)/debug -lkecleon
 	$(OBJCOPY) -O binary kernel.elf kernel.bin
 
-boot: build install ## Boots the kernel in a arm machine
+boot: build programs install ## Boots the kernel in a arm machine
 	qemu-system-arm -cpu arm1176 -M raspi2b -kernel kernel.bin -sd disk.img -no-reboot -monitor telnet:127.0.0.1:1234,server,nowait -serial stdio
 
 debug: build install ## Starts qemu in debug mode (gdb)

@@ -27,5 +27,9 @@
         "armtimer.h": "c",
         "mailbox.h": "c",
         "emmc.h": "c"
-    }
+    },
+    "rust-analyzer.linkedProjects": [
+        "/programs/shell/Cargo.toml"
+    ],
+    "rust-analyzer.showUnlinkedFileNotification": false
 }

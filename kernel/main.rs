@@ -3,13 +3,14 @@
 #![feature(panic_info_message)]
 
 pub mod emmc;
+pub mod ext2;
+pub mod filesystem;
 pub mod interrupts;
 pub mod memory;
 pub mod panic;
 pub mod screen;
 pub mod timer;
 pub mod uart;
-pub mod filesystem;
 
 extern "C" {
     fn framebuffer_initialize() -> u32;
@@ -66,5 +67,11 @@ pub extern "C" fn main() {
         screen::print("  Intializing File System -> ", screen::LIGHTBLUE);
         filesystem::initialize();
         screen::print("Initialized!\n", screen::GREEN);
+
+        let fd = filesystem::open("/boot/kernel.bin", 0);
+
+        screen::print_int(fd as u32, screen::GREEN);
+
+        hang();
     }
 }

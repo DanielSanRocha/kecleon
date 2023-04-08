@@ -67,7 +67,9 @@ pub fn print_string(s: *const u8, color: Pixel) {
     loop {
         unsafe {
             let c = *s.offset(i) as char;
-            if c == '\0' { break; }
+            if c == '\0' {
+                break;
+            }
 
             putc(c, &color);
             i += 1;

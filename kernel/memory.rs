@@ -82,3 +82,5 @@ pub extern "C" fn malloc(size: isize) -> *mut u32 {
         tmp as *mut u32
     }
 }
+
+pub extern "C" fn free(_ptr: *mut u32) {}
