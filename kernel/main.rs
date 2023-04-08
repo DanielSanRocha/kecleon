@@ -8,13 +8,17 @@ pub mod filesystem;
 pub mod interrupts;
 pub mod memory;
 pub mod panic;
+pub mod random;
 pub mod screen;
 pub mod timer;
 pub mod uart;
 
+const USER_SPACE: *mut u8 = 0x400000 as *mut u8;
+
 extern "C" {
     fn framebuffer_initialize() -> u32;
     fn hang();
+    fn goto_user_space();
 }
 
 #[no_mangle]
@@ -60,6 +64,12 @@ pub extern "C" fn main() {
         timer::schedule(screen::blink_cursor, 500 * 1000);
         screen::print("Blinking!\n", screen::GREEN);
 
+        screen::print("  Initialing Random module -> ", screen::LIGHTBLUE);
+        random::initialize(0x122);
+        screen::print("Initialized! Seed -> ", screen::GREEN);
+        screen::print_int(0x122, screen::WHITE);
+        screen::putc('\n', &screen::BLACK);
+
         screen::print("  Intializing EMMC     -> ", screen::LIGHTBLUE);
         emmc::initialize();
         screen::print("Intialized!\n", screen::GREEN);
@@ -68,9 +78,11 @@ pub extern "C" fn main() {
         filesystem::initialize();
         screen::print("Initialized!\n", screen::GREEN);
 
-        let fd = filesystem::open("/boot/kernel.bin", 0);
+        let fd = filesystem::open("/bin/shell", 1);
+        filesystem::read(fd, USER_SPACE, 1);
 
-        screen::print_int(fd as u32, screen::GREEN);
+        goto_user_space();
+
 
         hang();
     }

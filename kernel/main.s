@@ -21,3 +21,7 @@ start:
     BL main
     B .
 
+.global goto_user_space
+goto_user_space:
+    b 0x400000
+    b .
