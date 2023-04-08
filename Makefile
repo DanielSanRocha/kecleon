@@ -61,8 +61,9 @@ build: ## Builds the kernel targetting the armv7 architecture
 	$(CC) $(CC_PARAMS) -c kernel/font.c -o kernel/font_c.o
 	$(CC) $(CC_PARAMS) -c kernel/delays.c -o kernel/delays_c.o
 	$(CC) $(CC_PARAMS) -c kernel/emmc.c -o kernel/emmc_c.o
+	$(CC) $(CC_PARAMS) -c kernel/exceptions.c -o kernel/exceptions_c.o
 	$(CARGO) build --target $(CARGO_TARGET)
-	$(LD) -nostdlib -T kernel/link.ld -o kernel.elf kernel/interrupts_s.o kernel/main_s.o kernel/memory_s.o kernel/framebuffer_c.o kernel/font_c.o kernel/mailbox_c.o kernel/stdlib_c.o kernel/emmc_c.o kernel/delays_c.o -Ltarget/$(CARGO_TARGET)/debug -lkecleon
+	$(LD) -nostdlib -T kernel/link.ld -o kernel.elf kernel/interrupts_s.o kernel/main_s.o kernel/exceptions_c.o kernel/memory_s.o kernel/framebuffer_c.o kernel/font_c.o kernel/mailbox_c.o kernel/stdlib_c.o kernel/emmc_c.o kernel/delays_c.o -Ltarget/$(CARGO_TARGET)/debug -lkecleon
 	$(OBJCOPY) -O binary kernel.elf kernel.bin
 
 boot: build programs install ## Boots the kernel in a arm machine
