@@ -3,14 +3,10 @@
 #![feature(panic_info_message)]
 #![no_main]
 
-use core::panic::PanicInfo;
+use stdkecleon;
 
 #[no_mangle]
 pub extern "C" fn main() {
-    loop {}
+    stdkecleon::screen::print("Hello World!", &stdkecleon::screen::GREEN);
 }
 
-#[panic_handler]
-fn panic(_info: &PanicInfo) -> ! {
-    loop {}
-}

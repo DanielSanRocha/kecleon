@@ -12,6 +12,7 @@ pub mod random;
 pub mod screen;
 pub mod timer;
 pub mod uart;
+pub mod process;
 
 const USER_SPACE: *mut u8 = 0x400000 as *mut u8;
 
@@ -78,12 +79,14 @@ pub extern "C" fn main() {
         filesystem::initialize();
         screen::print("Initialized!\n", screen::GREEN);
 
+        screen::print("  Initializing Processes  -> ", screen::LIGHTBLUE);
+        process::initialize();
+        screen::print("Initialized!\n", screen::GREEN);
+
         let fd = filesystem::open("/bin/shell", 1);
         filesystem::read(fd, USER_SPACE, 1);
 
         goto_user_space();
-
-
         hang();
     }
 }

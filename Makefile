@@ -40,14 +40,16 @@ clean: # Cleans the directory
 	rm -f out.bochs
 
 programs: # Build the programs (shell, lib)
+	cd programs/lib   && $(AS) $(AS_PARAMS) src/syscalls.s -o src/syscalls_s.o
+	cd programs/lib   && $(AS) $(AS_PARAMS) src/start.s -o src/start_s.o
 	cd programs/shell && $(CARGO) build --target $(CARGO_TARGET)
-	cd programs/shell && $(LD) -nostdlib -T ../link.ld -o shell -Ltarget/$(CARGO_TARGET)/debug -lshell
+	cd programs/shell && $(LD) -nostdlib -T ../link.ld ../lib/src/start_s.o ../lib/src/syscalls_s.o -o shell.elf -Ltarget/$(CARGO_TARGET)/debug -lshell
 
 install: # Generate the iso image used by qemu
 	sudo mkdir -p tmp/boot
 	sudo cp kernel.bin tmp/boot
 	sudo mkdir -p tmp/bin
-	sudo cp programs/shell/shell tmp/bin
+	sudo $(OBJCOPY) -O binary programs/shell/shell.elf tmp/bin/shell
 
 build: ## Builds the kernel targetting the armv7 architecture
 	$(AS) $(AS_PARAMS) kernel/main.s -o kernel/main_s.o
