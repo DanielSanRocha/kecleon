@@ -22,7 +22,7 @@ vector_table:
 
 reset_handler_ptr:      .word start
 undefined_handler_ptr:  .word undefined_handler
-swi_handler_ptr:        .word swi_handler
+swi_handler_ptr:        .word swi
 prefetch_handler_ptr:   .word prefetch_handler
 data_handler_ptr:       .word data_handler
 unused_handler_ptr:     .word unused_handler
@@ -53,9 +53,14 @@ hang:
     wfi
     b hang
 
-.extern irq_handler
 irq:
     push {r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,lr}
     bl irq_handler
     pop  {r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,lr}
     subs pc,lr,#4
+
+swi:
+    push {r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,lr}
+    bl swi_handler
+    pop  {r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,lr}
+    eret

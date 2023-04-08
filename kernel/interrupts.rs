@@ -2,6 +2,7 @@ const INTERRUPTS_REGISTER: *mut u32 = 0x3F00B200 as *mut u32;
 
 use crate::memory;
 use crate::timer;
+use crate::screen;
 
 extern "C" {
     fn enable_interrupts();
@@ -36,8 +37,12 @@ extern "C" fn undefined_handler() {
 }
 
 #[no_mangle]
-extern "C" fn swi_handler() {
-    panic!("Swi Handler Called!");
+extern "C" fn swi_handler(r0: u32, r1: u32, r2: u32) {
+    if r0 == 0x1 {
+        screen::syscall(r1 as u8, r2);
+    } else {
+        screen::print("Invalid system call called!", screen::RED);
+    }
 }
 
 #[no_mangle]

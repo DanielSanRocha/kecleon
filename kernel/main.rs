@@ -84,9 +84,14 @@ pub extern "C" fn main() {
         screen::print("Initialized!\n", screen::GREEN);
 
         let fd = filesystem::open("/bin/shell", 1);
-        filesystem::read(fd, USER_SPACE, 1);
 
+        if fd == 0 {
+            panic!("/bin/shell not found!");
+        }
+
+        filesystem::read(fd, USER_SPACE, 1);
         goto_user_space();
+
         hang();
     }
 }
