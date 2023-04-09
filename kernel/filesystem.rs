@@ -56,19 +56,17 @@ pub fn read(fd: u16, buffer: *mut u8, nblocks: u16) -> u16 {
 }
 
 pub fn open(path: &str, process: u16) -> u16 {
-    unsafe {
-        if path.len() == 0 {
-            panic!("Trying to open file with empty name!");
-        }
-
-        if path.as_bytes()[0] != '/' as u8 {
-            panic!("Path must start  with a backslash '/'!");
-        }
-
-        let inode_number = open_recursion(2, &path[1..path.len()], process);
-
-        inode_number as u16
+    if path.len() == 0 {
+        panic!("Trying to open file with empty name!");
     }
+
+    if path.as_bytes()[0] != '/' as u8 {
+        panic!("Path must start  with a backslash '/'!");
+    }
+
+    let inode_number = open_recursion(2, &path[1..path.len()], process);
+
+    inode_number as u16
 }
 
 fn open_recursion(root: u32, path: &str, process: u16) -> u16 {

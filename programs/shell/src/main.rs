@@ -3,10 +3,10 @@
 #![feature(panic_info_message)]
 #![no_main]
 
-use stdkecleon;
+use std;
 
 #[no_mangle]
 pub extern "C" fn main() {
-    stdkecleon::screen::print("Hello World!", &stdkecleon::screen::GREEN);
+    std::screen::print("Hello World!", &std::screen::GREEN);
 }
 

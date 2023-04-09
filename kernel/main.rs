@@ -8,11 +8,11 @@ pub mod filesystem;
 pub mod interrupts;
 pub mod memory;
 pub mod panic;
+pub mod process;
 pub mod random;
 pub mod screen;
 pub mod timer;
 pub mod uart;
-pub mod process;
 
 const USER_SPACE: *mut u8 = 0x400000 as *mut u8;
 

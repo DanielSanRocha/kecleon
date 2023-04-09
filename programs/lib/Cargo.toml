@@ -1,5 +1,5 @@
 [package]
-name = "stdkecleon"
+name = "std"
 version = "0.1.0"
 edition = "2021"
 authors = ["Daniel Santana <danielsantanarocha@gmail.com>"]

@@ -6,4 +6,5 @@
 start:
     ldr sp, =stack_top
     bl main
-    b  .
+    svc 0x0
+    b   .

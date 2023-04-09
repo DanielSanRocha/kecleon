@@ -38,6 +38,9 @@ clean: # Cleans the directory
 	rm -rf *.iso
 	rm -rf *.elf
 	rm -f out.bochs
+	rm -rf programs/lib/*.o
+	rm -rf programs/lib/*.a
+	rm -rf programs/shell/*.elf
 
 programs: # Build the programs (shell, lib)
 	cd programs/lib   && $(AS) $(AS_PARAMS) src/syscalls.s -o src/syscalls_s.o
@@ -66,6 +69,7 @@ build: ## Builds the kernel targetting the armv7 architecture
 	$(OBJCOPY) -O binary kernel.elf kernel.bin
 
 boot: build programs install ## Boots the kernel in a arm machine
+	sync
 	qemu-system-arm -cpu arm1176 -M raspi2b -kernel kernel.bin -sd disk.img -no-reboot -monitor telnet:127.0.0.1:1234,server,nowait -serial stdio
 
 debug: build install ## Starts qemu in debug mode (gdb)
