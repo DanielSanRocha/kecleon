@@ -10,6 +10,7 @@ AS_PARAMS = -mcpu=cortex-a7
 
 LD = $(PREFIX)-ld
 OBJCOPY = $(PREFIX)-objcopy
+AR = $(PREFIX)-ar
 
 CARGO = cargo
 CARGO_TARGET = armv7a-none-eabi
@@ -39,16 +40,17 @@ clean: # Cleans the directory
 	rm -rf *.elf
 	rm -f out.bochs
 	rm -rf programs/lib/*.o
-	rm -rf programs/lib/*.a
-	rm -rf programs/lib/src/*.o
+	rm -rf programs/shell/*.o
 	rm -rf programs/shell/*.elf
 
 programs: # Build the programs (shell, lib)
-	cd programs/lib   && $(AS) $(AS_PARAMS) src/syscalls.s -o src/syscalls_s.o
-	cd programs/lib   && $(AS) $(AS_PARAMS) src/start.s -o src/start_s.o
+	cd programs/lib   && $(AS) $(AS_PARAMS) syscalls.s -o syscalls_s.o
+	cd programs/lib   && $(AS) $(AS_PARAMS) start.s -o start_s.o
+	cd programs/lib   && $(CC) $(CC_PARAMS) -c screen.c -o screen_c.o
+	cd programs/lib   && $(AR) rvs libstd.a start_s.o syscalls_s.o screen_c.o
 
-	cd programs/shell && $(CARGO) build --target $(CARGO_TARGET)
-	cd programs/shell && $(LD) -nostdlib -T ../link.ld ../lib/src/start_s.o ../lib/src/syscalls_s.o -o shell.elf -Ltarget/$(CARGO_TARGET)/debug -lshell
+	cd programs/shell && $(CC) $(CC_PARAMS) -I../lib -c main.c -o main_c.o
+	cd programs/shell && $(LD) -nostdlib -T ../link.ld main_c.o -o shell.elf -L../lib -lstd
 
 install: # Generate the iso image used by qemu
 	sudo mkdir -p tmp/boot
