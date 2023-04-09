@@ -38,8 +38,11 @@ extern "C" fn undefined_handler() {
 
 #[no_mangle]
 extern "C" fn swi_handler(r0: u32, r1: u32, r2: u32) {
-    if r0 == 0x1 {
-        screen::syscall(r1 as u8, r2);
+    let driver = (r0 & 0xF) as u8;
+    let number = (r0 >> 4) as u8;
+
+    if driver == 0x1 {
+        screen::syscall(number, r1, r2);
     } else {
         screen::print("Invalid system call called!", screen::RED);
     }
@@ -52,7 +55,7 @@ extern "C" fn prefetch_handler() {
 
 #[no_mangle]
 extern "C" fn data_handler() {
-    panic!("Data Handler Handler Called!");
+    panic!("Data Handler Called!");
 }
 
 #[no_mangle]

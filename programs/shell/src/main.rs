@@ -7,6 +7,6 @@ use std;
 
 #[no_mangle]
 pub extern "C" fn main() {
-    std::screen::print("Hello World!", &std::screen::GREEN);
+    std::screen::print("Hello World from User Space!", std::screen::GREEN);
 }
 

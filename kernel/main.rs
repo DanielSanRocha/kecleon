@@ -84,12 +84,20 @@ pub extern "C" fn main() {
         screen::print("Initialized!\n", screen::GREEN);
 
         let fd = filesystem::open("/bin/shell", 1);
-
         if fd == 0 {
             panic!("/bin/shell not found!");
         }
+        let size = filesystem::size(fd);
+        if size == 0 {
+            panic!("Error checking file size!");
+        }
+        let mut nblocks = (size / (1024 * 1024)) as u16;
+        if size > (nblocks as u32) * 1024 * 1024 {
+            nblocks += 1;
+        }
 
-        filesystem::read(fd, USER_SPACE, 1);
+        filesystem::read(fd, USER_SPACE, nblocks);
+
         goto_user_space();
 
         hang();

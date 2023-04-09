@@ -1,4 +1,3 @@
-use crate::screen;
 use crate::uart;
 
 const HEAP_BEGIN: *mut u32 = 0x100000 as *mut u32;

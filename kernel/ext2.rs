@@ -95,8 +95,16 @@ pub fn get_inode(number: u32, inode: *mut Inode) {
     }
 }
 
-pub fn read_inode(inode: *const Inode, buffer: *mut u8) {
+pub fn read_inode(inode: *const Inode, buffer: *mut u8, blocks: u8) {
     unsafe {
-        emmc::readblock(2 * (*inode).dbp0, buffer, 2);
+        if blocks == 0 { return; }
+        if blocks > 0 {
+            emmc::readblock(2 * (*inode).dbp0, buffer, 2);
+        }
+        if blocks > 1 {
+            let dbp1 = (*inode).dbp1;
+            if dbp1 == 0 {return;}
+            emmc::readblock(2 * dbp1, buffer.offset(1024), 2);
+        }
     }
 }

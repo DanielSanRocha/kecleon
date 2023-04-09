@@ -32,6 +32,21 @@ pub fn initialize() {
     }
 }
 
+pub fn size(fd: u16) -> u32 {
+    unsafe {
+        for i in 0..=255 {
+            if(*FILES.offset(i)).id == fd {
+                let file = *FILES.offset(i);
+                ext2::get_inode(file.inode, INODE_BUFFER);
+
+                return (*INODE_BUFFER).lower_size
+            }
+        }
+
+        return 0;
+    }
+}
+
 pub fn read(fd: u16, buffer: *mut u8, nblocks: u16) -> u16 {
     unsafe {
         for i in 0..=255 {
@@ -43,11 +58,11 @@ pub fn read(fd: u16, buffer: *mut u8, nblocks: u16) -> u16 {
                     return 0;
                 }
 
-                if nblocks > 1 {
-                    panic!("Files with size bigger than 12MB are not supported!");
+                if nblocks > 2 {
+                    panic!("Files with size bigger than 2MB are not supported!");
                 }
 
-                ext2::read_inode(INODE_BUFFER, buffer);
+                ext2::read_inode(INODE_BUFFER, buffer, nblocks as u8);
             }
         }
 
@@ -72,7 +87,7 @@ pub fn open(path: &str, process: u16) -> u16 {
 fn open_recursion(root: u32, path: &str, process: u16) -> u16 {
     unsafe {
         ext2::get_inode(root, INODE_BUFFER);
-        ext2::read_inode(INODE_BUFFER, BLOCK_BUFFER);
+        ext2::read_inode(INODE_BUFFER, BLOCK_BUFFER, 1);
 
         if (*INODE_BUFFER).permission & 0x4000 == 0 {
             return 0;

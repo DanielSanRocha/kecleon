@@ -174,10 +174,14 @@ fn draw_cursor(color: &Pixel) {
     }
 }
 
-pub fn syscall(c: u8, color: u32) {
-    let r = color as u8;
-    let g = (color >> 8) as u8;
-    let b = (color >> 16) as u8;
+pub fn syscall(number: u8, r1: u32, r2: u32) {
+    if number == 0x1 {
+        let r = r2 as u8;
+        let g = (r2 >> 8) as u8;
+        let b = (r2 >> 16) as u8;
 
-    putc(c as char, &Pixel {r: r, g: g, b: b});
+        putc(r1 as u8 as char, &Pixel {r: r, g: g, b: b});
+    } else {
+        print("Invalid screen systemcall called!", RED);
+    }
 }
