@@ -173,3 +173,11 @@ fn draw_cursor(color: &Pixel) {
         }
     }
 }
+
+pub fn syscall(c: u8, color: u32) {
+    let r = color as u8;
+    let g = (color >> 8) as u8;
+    let b = (color >> 16) as u8;
+
+    putc(c as char, &Pixel {r: r, g: g, b: b});
+}
