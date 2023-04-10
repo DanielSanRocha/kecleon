@@ -1,7 +1,7 @@
 #include "process.h"
 
-extern void exit_syscall();
+extern int exit_syscall();
 
-void exit() {
-    exit_syscall();
+int exit() {
+    return exit_syscall();
 }

@@ -43,9 +43,11 @@ pub fn start(binary: &str) {
     unsafe { goto_user_space(); }
 }
 
-pub fn syscall(number: u16, r1: u32, r2: u32) {
+pub fn syscall(number: u16, r1: u32, r2: u32) -> i32 {
     if  number == 0x0 {
+        0
     } else {
         screen::print("Invalid process systemcall called!", screen::RED);
+        -1
     }
 }

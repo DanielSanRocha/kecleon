@@ -77,7 +77,8 @@ pub fn print_string(s: *const u8, color: Pixel) {
     }
 }
 
-pub fn print_int(n: u32, color: Pixel) {
+#[no_mangle]
+pub extern "C" fn print_int(n: u32, color: Pixel) {
     let mut j = n;
     let mut c = 0 as u8;
     while j >= 10 {
@@ -174,14 +175,16 @@ fn draw_cursor(color: &Pixel) {
     }
 }
 
-pub fn syscall(number: u16, r1: u32, r2: u32) {
+pub fn syscall(number: u16, r1: u32, r2: u32) -> i32 {
     if number == 0x1 {
         let r = r2 as u8;
         let g = (r2 >> 8) as u8;
         let b = (r2 >> 16) as u8;
 
         putc(r1 as u8 as char, &Pixel { r: r, g: g, b: b });
+        0
     } else {
         print("Invalid screen systemcall called!", RED);
+        -1
     }
 }

@@ -10,5 +10,6 @@ SECTIONS {
     } > ram
     .bss : { *(.bss*) } > ram
      . = . + 0x4000;
+     . = ALIGN(8);
     stack_top = .;
 }

@@ -16,6 +16,7 @@ pub mod timer;
 pub mod usb;
 
 extern "C" {
+    fn get_cpsr() -> u32;
     fn framebuffer_initialize() -> u32;
     fn hang();
     fn goto_user_space();
@@ -48,6 +49,9 @@ pub extern "C" fn main() {
 
         screen::print("  Framebuffer location -> ", screen::WHITE);
         screen::print_int(framebuffer as u32, screen::GREEN);
+        screen::print("\n",screen::BLACK);
+        screen::print("  Current CPSR         -> ", screen::WHITE);
+        screen::print_int(get_cpsr(), screen::GREEN);
 
         screen::print("\n\n", screen::BLACK);
 
