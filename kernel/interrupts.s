@@ -21,7 +21,7 @@ vector_table:
     ldr pc,fiq_handler_ptr
 
 reset_handler_ptr:      .word start
-undefined_handler_ptr:  .word undefined_handler
+undefined_handler_ptr:  .word undefined
 swi_handler_ptr:        .word swi
 prefetch_handler_ptr:   .word prefetch_handler
 data_handler_ptr:       .word data_handler
@@ -73,3 +73,17 @@ swi:
     pop  {r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,lr}
     cpsie i
     eret
+
+.extern exit
+undefined:
+    cpsid i
+    movw r0, #0x15b
+    movt r0, #0x6000
+    msr spsr,r0
+    ldr r0,=undefined_supervisor
+    mov lr,r0
+    eret
+undefined_supervisor:
+    ldr sp, =stack_top
+    bl exit
+    b .

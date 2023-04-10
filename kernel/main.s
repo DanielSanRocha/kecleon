@@ -26,7 +26,6 @@ goto_user_space:
     msr spsr,r0
     mov r0,#0x400000
     mov lr,r0
-    @ b 0x400000
     eret
 
 .global get_cpsr
