@@ -38,14 +38,14 @@ extern "C" fn undefined_handler() {
 }
 
 #[no_mangle]
-extern "C" fn swi_handler(r0: u32, r1: u32, r2: u32) {
-    let driver = (r0 & 0xF) as u8;
-    let number = (r0 >> 4) as u8;
+extern "C" fn swi_handler(r0: u32, r1: u32, r2: u32, r3: u32) {
+    let driver = (r0 & 0xFFFF) as u16;
+    let number = r1 as u16;
 
     if driver == 0x0 {
-        process::syscall(number, r1, r2);
+        process::syscall(number, r2, r3);
     } else if driver == 0x1 {
-        screen::syscall(number, r1, r2);
+        screen::syscall(number, r2, r3);
     } else {
         screen::print("Invalid system call called!", screen::RED);
     }

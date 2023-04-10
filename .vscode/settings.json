@@ -1,6 +1,23 @@
 {
+    "explorer.sortOrder": "type",
     "files.exclude": {
-        "**/*.bin": true
+        "**/*.bin": true,
+        "**/*.o": true,
+        "**/*.a": true,
+        "**/kernel.bin": true,
+        "**/kernel-*": true,
+        "**/*.iso": true,
+        "**/*.vdi": true,
+        "**/*.lock": true,
+        "**/target/": true,
+        "**/tmp/": true,
+        "programs/shell/shell": true,
+        "**/out.bochs": true,
+        "**/*.elf": true,
+        "boot/u-boot.bin": false,
+        "**/vmlinuz": true,
+        "**/boot/": true,
+        "**/*.img": true
     },
     "files.associations": {
         "stdlib.h": "c",

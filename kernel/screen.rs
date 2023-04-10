@@ -174,7 +174,7 @@ fn draw_cursor(color: &Pixel) {
     }
 }
 
-pub fn syscall(number: u8, r1: u32, r2: u32) {
+pub fn syscall(number: u16, r1: u32, r2: u32) {
     if number == 0x1 {
         let r = r2 as u8;
         let g = (r2 >> 8) as u8;

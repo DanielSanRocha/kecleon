@@ -9,6 +9,10 @@ struct Process {
     pid: u16,
 }
 
+extern "C" {
+    fn goto_user_space();
+}
+
 static mut PROCESSES: *mut Process = 0x0 as *mut Process;
 const USER_SPACE: *mut u8 = 0x400000 as *mut u8;
 
@@ -35,10 +39,12 @@ pub fn start(binary: &str) {
     }
 
     filesystem::read(fd, USER_SPACE, nblocks);
+
+    unsafe { goto_user_space(); }
 }
 
-pub fn syscall(number: u8, r1: u32, r2: u32) {
-    if number == 0x0 {
+pub fn syscall(number: u16, r1: u32, r2: u32) {
+    if  number == 0x0 {
     } else {
         screen::print("Invalid process systemcall called!", screen::RED);
     }

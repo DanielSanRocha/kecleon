@@ -4,6 +4,7 @@
 
 pub mod emmc;
 pub mod ext2;
+pub mod uart;
 pub mod filesystem;
 pub mod interrupts;
 pub mod memory;
@@ -12,7 +13,7 @@ pub mod process;
 pub mod random;
 pub mod screen;
 pub mod timer;
-pub mod uart;
+pub mod usb;
 
 extern "C" {
     fn framebuffer_initialize() -> u32;
@@ -76,6 +77,10 @@ pub extern "C" fn main() {
         screen::print("  Intializing File System -> ", screen::LIGHTBLUE);
         filesystem::initialize();
         screen::print("Initialized!\n", screen::GREEN);
+
+        screen::print("  Initializing USB Driver -> ", screen::LIGHTBLUE);
+        usb::initialize();
+        screen::print("  Initialized!\n", screen::GREEN);
 
         screen::print("  Initializing Processes  -> ", screen::LIGHTBLUE);
         process::initialize();

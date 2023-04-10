@@ -61,7 +61,14 @@ irq:
     subs pc,lr,#4
 
 swi:
-    push {lr}
+    cpsid i
+    push {r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,lr}
+    mov r3,r2
+    mov r2,r1
+    mov r1,r0
+    LDR r0,[lr,#-4]
+    BIC r0,r0,#0xFF000000
     bl swi_handler
-    pop  {lr}
+    pop  {r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,lr}
+    cpsie i
     eret
