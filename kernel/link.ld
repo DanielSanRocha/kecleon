@@ -4,6 +4,7 @@ MEMORY {
 
 SECTIONS {
     .text : { *(.text*) } > ram
+    _etext = .;
     .data : { *(.data) } > ram
     .bss : { *(.bss*) } > ram
      . = . + 0x4000;

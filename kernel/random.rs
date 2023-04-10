@@ -8,7 +8,7 @@ pub fn initialize(seed: u32) {
 
 pub fn u16() -> u16 {
     unsafe {
-        CURRENT = (CURRENT * 110345 + 12345) % 1048576;
+        CURRENT += 1;
         CURRENT as u16
     }
 }

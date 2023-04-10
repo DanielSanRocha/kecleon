@@ -33,7 +33,7 @@ pub fn invalidate() {
 
 pub fn initialize() {
     unsafe {
-        MMUTABLEBASE = malloc(4096 * 4);
+        MMUTABLEBASE = kmalloc(4096 * 4);
 
         section(0x0, 0x0, 0x0);
         section(0x100000, 0x100000, 0x0000);
@@ -71,7 +71,7 @@ pub fn section(vadd: u32, padd: u32, flags: u32) {
 }
 
 #[no_mangle]
-pub extern "C" fn malloc(size: isize) -> *mut u32 {
+pub extern "C" fn kmalloc(size: isize) -> *mut u32 {
     uart::print("\n\t\tAllocated ");
     uart::print_int(size as u32);
     uart::print(" bytes!");

@@ -40,14 +40,15 @@ clean: # Cleans the directory
 	rm -rf *.elf
 	rm -f out.bochs
 	rm -rf programs/lib/*.o
+	rm -rf programs/lib/*.a
 	rm -rf programs/shell/*.o
 	rm -rf programs/shell/*.elf
 
 programs: # Build the programs (shell, lib)
 	cd programs/lib   && $(AS) $(AS_PARAMS) syscalls.s -o syscalls_s.o
-	cd programs/lib   && $(AS) $(AS_PARAMS) start.s -o start_s.o
 	cd programs/lib   && $(CC) $(CC_PARAMS) -c screen.c -o screen_c.o
-	cd programs/lib   && $(AR) rvs libstd.a start_s.o syscalls_s.o screen_c.o
+	cd programs/lib   && $(CC) $(CC_PARAMS) -c process.c -o process_c.o
+	cd programs/lib   && $(AR) rvs libstd.a syscalls_s.o screen_c.o process_c.o
 
 	cd programs/shell && $(CC) $(CC_PARAMS) -I../lib -c main.c -o main_c.o
 	cd programs/shell && $(LD) -nostdlib -T ../link.ld main_c.o -o shell.elf -L../lib -lstd
@@ -70,7 +71,7 @@ build: ## Builds the kernel targetting the armv7 architecture
 	$(CC) $(CC_PARAMS) -c kernel/delays.c -o kernel/delays_c.o
 	$(CC) $(CC_PARAMS) -c kernel/emmc.c -o kernel/emmc_c.o
 	$(CARGO) build --target $(CARGO_TARGET)
-	$(LD) -nostdlib -T kernel/link.ld -o kernel.elf kernel/interrupts_s.o kernel/main_s.o kernel/memory_s.o kernel/framebuffer_c.o kernel/font_c.o kernel/mailbox_c.o kernel/stdlib_c.o kernel/emmc_c.o kernel/delays_c.o -Ltarget/$(CARGO_TARGET)/debug -lkecleon
+	$(LD) -nostdlib -T kernel/link.ld -o kernel.elf kernel/interrupts_s.o kernel/main_s.o kernel/memory_s.o kernel/framebuffer_c.o kernel/font_c.o kernel/mailbox_c.o kernel/stdlib_c.o kernel/emmc_c.o kernel/delays_c.o -Ltarget/$(CARGO_TARGET)/debug -lkecleon -Llib
 	$(OBJCOPY) -O binary kernel.elf kernel.bin
 
 boot: build programs install ## Boots the kernel in a raspi2b machine

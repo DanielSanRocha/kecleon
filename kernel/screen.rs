@@ -180,7 +180,7 @@ pub fn syscall(number: u8, r1: u32, r2: u32) {
         let g = (r2 >> 8) as u8;
         let b = (r2 >> 16) as u8;
 
-        putc(r1 as u8 as char, &Pixel {r: r, g: g, b: b});
+        putc(r1 as u8 as char, &Pixel { r: r, g: g, b: b });
     } else {
         print("Invalid screen systemcall called!", RED);
     }

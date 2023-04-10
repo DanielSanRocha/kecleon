@@ -14,7 +14,7 @@ const SYSTEM_TIMER_REGISTER: *mut u32 = 0x3F003000 as *mut u32;
 
 pub fn initialize() {
     unsafe {
-        SCHEDULES = memory::malloc(72 * 64) as *mut Schedule;
+        SCHEDULES = memory::kmalloc(72 * 64) as *mut Schedule;
 
         for i in 0..=63 {
             (*SCHEDULES.offset(i)).flags = 0;

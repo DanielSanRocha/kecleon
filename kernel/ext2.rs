@@ -63,19 +63,19 @@ static mut ROOT: *mut Inode = 0x0 as *mut Inode;
 
 pub fn initialize() {
     unsafe {
-        SUPERBLOCK = memory::malloc(1024) as *const SuperBlock;
+        SUPERBLOCK = memory::kmalloc(1024) as *const SuperBlock;
         emmc::readblock(2, SUPERBLOCK as *mut u8, 2);
 
         if (*SUPERBLOCK).magic_number != 0xef53 {
             panic!("Wrong magic number for Ext2!!");
         }
 
-        BGD = memory::malloc(32 * 32) as *const BlockGroupDescriptor;
+        BGD = memory::kmalloc(32 * 32) as *const BlockGroupDescriptor;
         emmc::readblock(4, BGD as *mut u8, 2);
 
-        BUFFER = memory::malloc(1024) as *mut u8;
+        BUFFER = memory::kmalloc(1024) as *mut u8;
 
-        ROOT = memory::malloc(128) as *mut Inode;
+        ROOT = memory::kmalloc(128) as *mut Inode;
         get_inode(2, ROOT);
     }
 }
@@ -97,13 +97,17 @@ pub fn get_inode(number: u32, inode: *mut Inode) {
 
 pub fn read_inode(inode: *const Inode, buffer: *mut u8, blocks: u8) {
     unsafe {
-        if blocks == 0 { return; }
+        if blocks == 0 {
+            return;
+        }
         if blocks > 0 {
             emmc::readblock(2 * (*inode).dbp0, buffer, 2);
         }
         if blocks > 1 {
             let dbp1 = (*inode).dbp1;
-            if dbp1 == 0 {return;}
+            if dbp1 == 0 {
+                return;
+            }
             emmc::readblock(2 * dbp1, buffer.offset(1024), 2);
         }
     }

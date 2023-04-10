@@ -1,7 +1,7 @@
 #include "stdlib.h"
 #include "mailbox.h"
 
-extern void* malloc(uint32_t size);
+extern void* kmalloc(uint32_t size);
 
 mail_message_t mailbox_read(int channel) {
     mail_status_t stat;
@@ -72,7 +72,7 @@ int send_messages(property_message_tag_t * tags) {
     // buffer size must be 16 byte aligned
     bufsize += (bufsize % 16) ? 16 - (bufsize % 16) : 0;
 
-    msg = malloc(bufsize);
+    msg = kmalloc(bufsize);
     if (!msg)
         return -1;
 

@@ -46,3 +46,20 @@ fn print_int_loop(i: u32, count: u8) {
         print_int_loop(new_i, count - 1);
     }
 }
+
+#[no_mangle]
+extern "C" fn uart_print(s: *const u8, length: u32) {
+    unsafe {
+        let mut index = 0;
+        loop {
+            print_char(*s.offset(index));
+            index += 1;
+            if index >= length as isize { break; }
+        }
+    }
+}
+
+#[no_mangle]
+extern "C" fn uart_print_int(n: u32) {
+    print_int(n);
+}

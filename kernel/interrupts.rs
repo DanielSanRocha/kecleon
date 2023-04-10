@@ -1,8 +1,9 @@
 const INTERRUPTS_REGISTER: *mut u32 = 0x3F00B200 as *mut u32;
 
 use crate::memory;
-use crate::timer;
+use crate::process;
 use crate::screen;
+use crate::timer;
 
 extern "C" {
     fn enable_interrupts();
@@ -41,7 +42,9 @@ extern "C" fn swi_handler(r0: u32, r1: u32, r2: u32) {
     let driver = (r0 & 0xF) as u8;
     let number = (r0 >> 4) as u8;
 
-    if driver == 0x1 {
+    if driver == 0x0 {
+        process::syscall(number, r1, r2);
+    } else if driver == 0x1 {
         screen::syscall(number, r1, r2);
     } else {
         screen::print("Invalid system call called!", screen::RED);

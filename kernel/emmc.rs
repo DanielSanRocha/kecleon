@@ -8,7 +8,7 @@ extern "C" {
 
 pub fn initialize() {
     unsafe {
-        let buffer = memory::malloc(512) as *mut u8;
+        let buffer = memory::kmalloc(512) as *mut u8;
         sd_init();
         sd_readblock(2, buffer, 1);
 

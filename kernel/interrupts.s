@@ -32,6 +32,7 @@ fiq_handler_ptr:        .word fiq_handler
 .global move_vector_table
 move_vector_table:
     push {r0-r9}
+    cpsid i
 
     mov r0,#0x10000
     mov r1,#0x0000

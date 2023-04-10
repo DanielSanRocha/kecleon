@@ -18,7 +18,7 @@ static mut BLOCK_BUFFER: *mut u8 = 0x0 as *mut u8;
 pub fn initialize() {
     ext2::initialize();
     unsafe {
-        FILES = memory::malloc(12 * 256) as *mut File;
+        FILES = memory::kmalloc(12 * 256) as *mut File;
 
         for i in 0..=255 {
             (*FILES.offset(i)).id = 0;
@@ -27,19 +27,19 @@ pub fn initialize() {
             (*FILES.offset(i)).process = 0;
         }
 
-        INODE_BUFFER = memory::malloc(128) as *mut ext2::Inode;
-        BLOCK_BUFFER = memory::malloc(1024) as *mut u8;
+        INODE_BUFFER = memory::kmalloc(128) as *mut ext2::Inode;
+        BLOCK_BUFFER = memory::kmalloc(1024) as *mut u8;
     }
 }
 
 pub fn size(fd: u16) -> u32 {
     unsafe {
         for i in 0..=255 {
-            if(*FILES.offset(i)).id == fd {
+            if (*FILES.offset(i)).id == fd {
                 let file = *FILES.offset(i);
                 ext2::get_inode(file.inode, INODE_BUFFER);
 
-                return (*INODE_BUFFER).lower_size
+                return (*INODE_BUFFER).lower_size;
             }
         }
 
@@ -79,9 +79,9 @@ pub fn open(path: &str, process: u16) -> u16 {
         panic!("Path must start  with a backslash '/'!");
     }
 
-    let inode_number = open_recursion(2, &path[1..path.len()], process);
+    let fd = open_recursion(2, &path[1..path.len()], process);
 
-    inode_number as u16
+    fd as u16
 }
 
 fn open_recursion(root: u32, path: &str, process: u16) -> u16 {

@@ -7,3 +7,11 @@ putc_syscall:
     svc 0x1
     pop {lr}
     bx  lr
+
+.global exit_syscall
+exit_syscall:
+    push {lr}
+    mov r0, #0x0
+    svc 0x0
+    pop {lr}
+    bx  lr
