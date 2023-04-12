@@ -28,7 +28,7 @@ pub fn initialize() {
         }
 
         INODE_BUFFER = memory::kmalloc(128) as *mut ext2::Inode;
-        BLOCK_BUFFER = memory::kmalloc(1024) as *mut u8;
+        BLOCK_BUFFER = memory::kmalloc(64 * 1024) as *mut u8;
     }
 }
 
@@ -47,7 +47,7 @@ pub fn size(fd: u16) -> u32 {
     }
 }
 
-pub fn read(fd: u16, buffer: *mut u8, nblocks: u16) -> u16 {
+pub fn read(fd: u16, buffer: *mut u8, nblocks: u32) -> u32 {
     unsafe {
         for i in 0..=255 {
             if (*FILES.offset(i)).id == fd {
@@ -58,11 +58,7 @@ pub fn read(fd: u16, buffer: *mut u8, nblocks: u16) -> u16 {
                     return 0;
                 }
 
-                if nblocks > 2 {
-                    panic!("Files with size bigger than 2MB are not supported!");
-                }
-
-                ext2::read_inode(INODE_BUFFER, buffer, nblocks as u8);
+                ext2::read_inode(INODE_BUFFER, buffer, nblocks, 0);
             }
         }
 
@@ -70,6 +66,7 @@ pub fn read(fd: u16, buffer: *mut u8, nblocks: u16) -> u16 {
     }
 }
 
+use crate::screen;
 pub fn open(path: &str, process: u16) -> u16 {
     if path.len() == 0 {
         panic!("Trying to open file with empty name!");
@@ -81,17 +78,18 @@ pub fn open(path: &str, process: u16) -> u16 {
 
     let fd = open_recursion(2, &path[1..path.len()], process);
 
-    fd as u16
+    fd
 }
 
 fn open_recursion(root: u32, path: &str, process: u16) -> u16 {
     unsafe {
         ext2::get_inode(root, INODE_BUFFER);
-        ext2::read_inode(INODE_BUFFER, BLOCK_BUFFER, 1);
 
         if (*INODE_BUFFER).permission & 0x4000 == 0 {
             return 0;
         }
+        memory::memset(BLOCK_BUFFER, 0x0, 64 * 1024);
+        ext2::read_inode(INODE_BUFFER, BLOCK_BUFFER, 64, 0);
 
         let mut i = 0;
         loop {
@@ -106,6 +104,7 @@ fn open_recursion(root: u32, path: &str, process: u16) -> u16 {
             if path.len() >= namesize as usize {
                 for j in 0..namesize {
                     let c = *BLOCK_BUFFER.offset(8 + j as isize + i as isize) as char;
+
                     if path.as_bytes()[j as usize] != c as u8 {
                         flag = 0;
                         break;

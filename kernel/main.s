@@ -21,11 +21,10 @@ start:
 
 .global goto_user_space
 goto_user_space:
-    movw r0, #0x150
-    movt r0, #0x6000
-    msr spsr,r0
-    mov r0,#0x400000
-    mov lr,r0
+    movw r2, #0x150
+    movt r2, #0x6000
+    msr spsr,r2
+    mov lr,#0x400000
     eret
 
 .global get_cpsr

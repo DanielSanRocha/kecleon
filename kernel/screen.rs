@@ -12,6 +12,8 @@ extern "C" {
     pub fn font(c: u8) -> *const u8;
 }
 
+#[repr(packed, C)]
+#[derive(Clone, Copy)]
 pub struct Pixel {
     pub r: u8,
     pub g: u8,

@@ -2,6 +2,6 @@
 
 void main() {
     for(int i = 0;;i++) {
-        print("Hello from User Space!", 0x4321);
+        print("Echo!", 0x32FF);
     }
 }

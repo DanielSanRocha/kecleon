@@ -1,4 +1,4 @@
-ENTRY(_start)
+ENTRY(start)
 MEMORY {
     ram : ORIGIN = 0x400000, LENGTH = 0x400000
 }

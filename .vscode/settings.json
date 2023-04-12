@@ -28,7 +28,8 @@
         "cpuregs.h": "c",
         "armtimer.h": "c",
         "mailbox.h": "c",
-        "emmc.h": "c"
+        "emmc.h": "c",
+        "screen.h": "c"
     },
     "rust-analyzer.linkedProjects": [
         "/programs/shell/Cargo.toml"

@@ -4,7 +4,6 @@
 
 pub mod emmc;
 pub mod ext2;
-pub mod uart;
 pub mod filesystem;
 pub mod interrupts;
 pub mod memory;
@@ -13,6 +12,7 @@ pub mod process;
 pub mod random;
 pub mod screen;
 pub mod timer;
+pub mod uart;
 pub mod usb;
 
 extern "C" {
@@ -49,7 +49,7 @@ pub extern "C" fn main() {
 
         screen::print("  Framebuffer location -> ", screen::WHITE);
         screen::print_int(framebuffer as u32, screen::GREEN);
-        screen::print("\n",screen::BLACK);
+        screen::print("\n", screen::BLACK);
         screen::print("  Current CPSR         -> ", screen::WHITE);
         screen::print_int(get_cpsr(), screen::GREEN);
 
@@ -69,9 +69,9 @@ pub extern "C" fn main() {
         screen::print("Blinking!\n", screen::GREEN);
 
         screen::print("  Initialing Random module -> ", screen::LIGHTBLUE);
-        random::initialize(0x122);
+        random::initialize(1);
         screen::print("Initialized! Seed -> ", screen::GREEN);
-        screen::print_int(0x122, screen::WHITE);
+        screen::print_int(1, screen::WHITE);
         screen::putc('\n', &screen::BLACK);
 
         screen::print("  Intializing EMMC     -> ", screen::LIGHTBLUE);
@@ -87,11 +87,19 @@ pub extern "C" fn main() {
         screen::print("  Initialized!\n", screen::GREEN);
 
         screen::print("  Initializing Processes  -> ", screen::LIGHTBLUE);
+        interrupts::disable();
         process::initialize();
+        let pid = process::start("/bin/shell", "I am one process!");
+        process::start("/bin/echo", "I am another process!");
+        process::set_current(pid);
         screen::print("Initialized!\n", screen::GREEN);
 
+        screen::print("  Starting process scheduler -> ", screen::LIGHTBLUE);
+        timer::schedule(process::schedule, 50 * 1000);
+        screen::print("Started!\n", screen::GREEN);
+
         screen::print("\n", screen::BLACK);
-        process::start("/bin/shell");
+        goto_user_space();
 
         hang();
     }

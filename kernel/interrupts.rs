@@ -6,6 +6,7 @@ use crate::screen;
 use crate::timer;
 
 extern "C" {
+    fn disable_interrupts();
     fn enable_interrupts();
     fn move_vector_table();
 }
@@ -14,7 +15,7 @@ pub fn initialize() {
     unsafe {
         move_vector_table();
     }
-    memory::outq(INTERRUPTS_REGISTER, 2, 4);
+    memory::outq(INTERRUPTS_REGISTER, 3, 4);
 }
 
 #[no_mangle]
@@ -29,6 +30,12 @@ extern "C" fn irq_handler() {
 pub fn enable() {
     unsafe {
         enable_interrupts();
+    }
+}
+
+pub fn disable() {
+    unsafe {
+        disable_interrupts();
     }
 }
 

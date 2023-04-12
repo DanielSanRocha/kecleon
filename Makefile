@@ -23,8 +23,8 @@ lint: # lint rust code
 
 setup: # Mount disk.img on the tmp folder
 	mkdir -p tmp
-	dd if=/dev/zero of=disk.img bs=1M count=32
-	mkfs.ext2 -b 1024 disk.img
+	dd if=/dev/zero of=disk.img bs=1M count=128
+	mkfs.ext2 -b 4096 disk.img
 	sudo mount -o loop,offset=0 disk.img tmp
 
 clean: # Cleans the directory
@@ -45,14 +45,18 @@ clean: # Cleans the directory
 	rm -rf programs/shell/*.elf
 
 programs: # Build the programs (shell, lib)
-	cd programs/lib   && $(AS) $(AS_PARAMS) start.s -o start_s.o
 	cd programs/lib   && $(AS) $(AS_PARAMS) syscalls.s -o syscalls_s.o
 	cd programs/lib   && $(CC) $(CC_PARAMS) -c screen.c -o screen_c.o
 	cd programs/lib   && $(CC) $(CC_PARAMS) -c process.c -o process_c.o
 	cd programs/lib   && $(AR) rvs libstd.a syscalls_s.o screen_c.o process_c.o
 
+	cd programs/shell && $(AS) $(AS_PARAMS) start.s -o start_s.o
 	cd programs/shell && $(CC) $(CC_PARAMS) -I../lib -c main.c -o main_c.o
-	cd programs/shell && $(LD) -nostdlib -T ../link.ld ../lib/start_s.o main_c.o -o shell.elf -L../lib -lstd
+	cd programs/shell && $(LD) -nostdlib -T link.ld start_s.o main_c.o -o shell.elf -L../lib -lstd
+
+	cd programs/echo  && $(AS) $(AS_PARAMS) start.s -o start_s.o
+	cd programs/echo  && $(CC) $(CC_PARAMS) -I../lib -c main.c -o main_c.o
+	cd programs/echo  && $(LD) -nostdlib -T link.ld start_s.o main_c.o -o echo.elf -L../lib -lstd
 
 install: # Generate the iso image used by qemu
 	sudo mkdir -p tmp/boot
@@ -60,6 +64,7 @@ install: # Generate the iso image used by qemu
 	sudo mkdir -p tmp/bin
 
 	sudo $(OBJCOPY) -O binary programs/shell/shell.elf tmp/bin/shell
+	sudo $(OBJCOPY) -O binary programs/echo/echo.elf tmp/bin/echo
 
 build: ## Builds the kernel targetting the armv7 architecture
 	$(AS) $(AS_PARAMS) kernel/main.s -o kernel/main_s.o

@@ -54,7 +54,9 @@ extern "C" fn uart_print(s: *const u8, length: u32) {
         loop {
             print_char(*s.offset(index));
             index += 1;
-            if index >= length as isize { break; }
+            if index >= length as isize {
+                break;
+            }
         }
     }
 }

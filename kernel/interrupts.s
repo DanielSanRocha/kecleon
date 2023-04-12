@@ -49,16 +49,63 @@ enable_interrupts:
     cpsie i
     bx lr
 
+.global disable_interrupts
+disable_interrupts:
+    cpsid i
+    bx    lr
+
 .global hang
 hang:
     wfi
     b hang
 
-.extern stack_irq_top
+.extern get_application_state
 irq:
-    push {r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,lr}
+    cpsid i
+    push {r0}
+    push {r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,lr}
+
+    mrs r0, spsr
+    and r0, r0, #3
+    cmp r0,#0
+    bne kernel_irq
+user_irq:
+    bl get_application_state
+    add r0,#4
+    pop {r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,lr}
+    stmia r0!,{r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,lr}
+    mov r1,r0
+    pop {r0}
+    stmia r1!,{r0}
+
+    mrs r0,sp_usr
+    stmia r1!,{r0}
+    mrs r0,lr_usr
+    stmia r1, {r0}
+
     bl irq_handler
-    pop  {r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,lr}
+
+    bl get_application_state
+    add r0,#4
+    ldmia r0!,{r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,lr}
+    push {r1}
+    mov r1,r0
+    ldmia r1!,{r0}
+    push {r0}
+
+    ldmia r1!,{r0}
+    msr sp_usr,r0
+    ldmia r1!,{r0}
+    msr lr_usr,r0
+
+    pop {r0}
+    pop {r1}
+debug_switch:
+    subs pc,lr,#4
+kernel_irq:
+    bl irq_handler
+    pop  {r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,lr}
+    pop  {r0}
     subs pc,lr,#4
 
 swi:
@@ -71,7 +118,6 @@ swi:
     BIC r0,r0,#0xFF000000
     bl swi_handler
     pop  {r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,lr}
-    cpsie i
     eret
 
 .extern exit
@@ -85,5 +131,6 @@ undefined:
     eret
 undefined_supervisor:
     ldr sp, =stack_top
+    mov r0,#-1
     bl exit
     b .

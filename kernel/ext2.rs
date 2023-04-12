@@ -41,25 +41,18 @@ pub struct Inode {
     pub sectors_number: u32,
     pub flags: u32,
     pub garbage1: u32,
-    pub dbp0: u32,
-    pub dbp1: u32,
-    pub dbp2: u32,
-    pub dbp3: u32,
-    pub dbp4: u32,
-    pub dbp5: u32,
-    pub dbp6: u32,
-    pub dbp7: u32,
-    pub dbp8: u32,
-    pub dbp9: u32,
-    pub dbp10: u32,
-    pub dbp11: u32,
-    pub garbage2: [u8; 40],
+    pub dbp: [u32; 12],
+    pub ibp: u32,
+    pub dibp: u32,
+    pub tibp: u32,
+    pub garbage2: [u8; 28],
 }
 
 static mut SUPERBLOCK: *const SuperBlock = 0x0 as *const SuperBlock;
 static mut BGD: *const BlockGroupDescriptor = 0x0 as *const BlockGroupDescriptor;
 static mut BUFFER: *mut u8 = 0x0 as *mut u8;
-static mut ROOT: *mut Inode = 0x0 as *mut Inode;
+static mut LBLOCK_SIZE: u32 = 2;
+static mut SPB: u32 = 1024;
 
 pub fn initialize() {
     unsafe {
@@ -70,45 +63,48 @@ pub fn initialize() {
             panic!("Wrong magic number for Ext2!!");
         }
 
-        BGD = memory::kmalloc(32 * 32) as *const BlockGroupDescriptor;
-        emmc::readblock(4, BGD as *mut u8, 2);
+        LBLOCK_SIZE = 1 << (*SUPERBLOCK).lblock_size;
+        SPB = 2 * LBLOCK_SIZE;
 
-        BUFFER = memory::kmalloc(1024) as *mut u8;
+        BGD = memory::kmalloc(512 * SPB as isize) as *const BlockGroupDescriptor;
+        emmc::readblock(2 * (*SUPERBLOCK).lblock_size + 4, BGD as *mut u8, SPB);
 
-        ROOT = memory::kmalloc(128) as *mut Inode;
-        get_inode(2, ROOT);
+        BUFFER = memory::kmalloc(512 * SPB as isize) as *mut u8;
     }
 }
+
+use crate::screen;
 
 pub fn get_inode(number: u32, inode: *mut Inode) {
     unsafe {
         let group = (number - 1) / (*SUPERBLOCK).inodes_per_group;
         let index = (number - 1) % (*SUPERBLOCK).inodes_per_group;
-        let block = (index * 128) / 1024;
+        let block = (index * 128) / (512 * SPB);
 
         let bgd = *BGD.offset(group as isize);
 
-        emmc::readblock(2 * bgd.inode_table + 2 * block, BUFFER, 2);
+        emmc::readblock(SPB * bgd.inode_table + SPB * block, BUFFER, SPB);
 
         let inodes: *mut Inode = BUFFER as *mut Inode;
         *inode = *inodes.offset(index as isize);
     }
 }
 
-pub fn read_inode(inode: *const Inode, buffer: *mut u8, blocks: u8) {
+pub fn read_inode(inode: *const Inode, buffer: *mut u8, blocks: u32, offset: u32) {
     unsafe {
         if blocks == 0 {
             return;
         }
-        if blocks > 0 {
-            emmc::readblock(2 * (*inode).dbp0, buffer, 2);
-        }
-        if blocks > 1 {
-            let dbp1 = (*inode).dbp1;
-            if dbp1 == 0 {
+
+        if offset <= 11 {
+            let bp = (*inode).dbp[offset as usize];
+            if bp == 0 {
                 return;
             }
-            emmc::readblock(2 * dbp1, buffer.offset(1024), 2);
+            emmc::readblock(SPB * bp, buffer, SPB);
+            read_inode(inode, buffer.offset(512 * SPB as isize), blocks - 1, offset + 1);
+        } else {
+            //TODO implement this function
         }
     }
 }
