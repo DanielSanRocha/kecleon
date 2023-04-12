@@ -89,12 +89,12 @@ pub extern "C" fn main() {
         screen::print("  Initializing Processes  -> ", screen::LIGHTBLUE);
         interrupts::disable();
         process::initialize();
-        process::start("/bin/shell", "I am one process!");
-        process::start("/bin/echo", "I am another process!");
+        process::start("/bin/shell", "I am one process!", 0);
+        process::start("/bin/echo", "I am another process!", 0);
         screen::print("Initialized!\n", screen::GREEN);
 
         screen::print("  Starting process scheduler -> ", screen::LIGHTBLUE);
-        timer::schedule(process::schedule, 50 * 1000);
+        timer::schedule(process::schedule, 1000 * 10);
         screen::print("Started!\n", screen::GREEN);
 
         screen::print("\n", screen::BLACK);

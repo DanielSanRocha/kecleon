@@ -91,7 +91,7 @@ pub fn schedule(_deltatime: u32) {
     }
 }
 
-pub fn start(binary: &str, arguments: &str) -> u16 {
+pub fn start(binary: &str, arguments: &str, parent: u16) -> u16 {
     unsafe {
         let pid = new_pid();
 
@@ -118,7 +118,7 @@ pub fn start(binary: &str, arguments: &str) -> u16 {
             let proc = *PROCESSES.offset(i);
             if proc.pid == 0 {
                 (*PROCESSES.offset(i)).pid = pid;
-                (*PROCESSES.offset(i)).parent = 0;
+                (*PROCESSES.offset(i)).parent = parent;
                 (*PROCESSES.offset(i)).pc = 0x400000;
                 (*PROCESSES.offset(i)).sp = 0x0;
                 (*PROCESSES.offset(i)).lr = 0x0;
