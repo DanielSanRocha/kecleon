@@ -1,6 +1,5 @@
 use crate::filesystem;
 use crate::memory;
-use crate::random;
 use crate::screen;
 
 #[repr(packed, C)]
@@ -43,8 +42,30 @@ pub fn initialize() {
     }
 }
 
+pub fn new_pid() -> u16 {
+    // TODO optimize this algorithm
+    let mut npid = 1 as u16;
+    let mut i = 0;
+
+    unsafe {
+        loop {
+            i = 0;
+            loop {
+                let pid = (*PROCESSES.offset(i)).pid;
+                if pid == npid {
+                    npid += 1;
+                    break;
+                }
+                i += 1;
+                if i == 256 {
+                    return npid;
+                }
+            }
+        }
+    }
+}
+
 pub fn schedule(_deltatime: u32) {
-    screen::print("xpto", screen::WHITE);
     unsafe {
         for i in (CURRENT_PROCESS_INDEX + 1)..=255 {
             let proc = *PROCESSES.offset(i as isize);
@@ -72,7 +93,7 @@ pub fn schedule(_deltatime: u32) {
 
 pub fn start(binary: &str, arguments: &str) -> u16 {
     unsafe {
-        let pid = random::u16();
+        let pid = new_pid();
 
         let fd = filesystem::open(binary, pid);
         if fd == 0 {
@@ -107,6 +128,8 @@ pub fn start(binary: &str, arguments: &str) -> u16 {
                 }
 
                 memory::switch(pid);
+                CURRENT_PROCESS_INDEX = i as u16;
+                CURRENT_PROCESS_PID = pid;
 
                 filesystem::read(fd, USER_SPACE, nblocks);
 
@@ -135,7 +158,7 @@ pub fn set_current(pid: u16) {
 }
 
 #[no_mangle]
-pub extern "C" fn get_application_state() -> *const Process {
+pub extern "C" fn get_application_state() -> *mut Process {
     unsafe {
         return PROCESSES.offset(CURRENT_PROCESS_INDEX as isize);
     }

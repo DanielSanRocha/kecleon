@@ -1,6 +1,5 @@
 use crate::ext2;
 use crate::memory;
-use crate::random;
 
 #[repr(packed)]
 #[derive(Clone, Copy)]
@@ -129,12 +128,34 @@ fn open_recursion(root: u32, path: &str, process: u16) -> u16 {
     }
 }
 
+fn new_id() -> u16 {
+    let mut nid = 1 as u16;
+    let mut i = 0;
+
+    unsafe {
+        loop {
+            i = 0;
+            loop {
+                let id = (*FILES.offset(i)).id;
+                if nid == id {
+                    nid += 1;
+                    break;
+                }
+                i += 1;
+                if i == 256 {
+                    return nid;
+                }
+            }
+        }
+    }
+}
+
 fn create_fd(inode: u32, process: u16) -> u16 {
     for i in 0..=255 {
         unsafe {
             let file = *FILES.offset(i);
             if file.id == 0 {
-                let id = random::u16();
+                let id = new_id();
                 (*FILES.offset(i)).id = id;
                 (*FILES.offset(i)).inode = inode;
                 (*FILES.offset(i)).offset = 0;

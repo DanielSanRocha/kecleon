@@ -89,9 +89,8 @@ pub extern "C" fn main() {
         screen::print("  Initializing Processes  -> ", screen::LIGHTBLUE);
         interrupts::disable();
         process::initialize();
-        let pid = process::start("/bin/shell", "I am one process!");
+        process::start("/bin/shell", "I am one process!");
         process::start("/bin/echo", "I am another process!");
-        process::set_current(pid);
         screen::print("Initialized!\n", screen::GREEN);
 
         screen::print("  Starting process scheduler -> ", screen::LIGHTBLUE);
