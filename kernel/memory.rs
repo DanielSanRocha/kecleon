@@ -107,11 +107,25 @@ pub fn alloc_page(pid: u16) -> u32 {
                 (*PAGES.offset(i)).addr = 0x400000 + 0x100000 * i as u32;
                 (*PAGES.offset(i)).order = count;
 
-                return (*PAGES.offset(i)).addr;
+                return 0x400000 + 0x100000 * count as u32;;
             }
         }
 
         panic!("No memory left on the device!");
+    }
+}
+
+pub fn free_pages(pid: u16) {
+    unsafe {
+        for i in 0..=127 {
+            if (*PAGES.offset(i)).pid == pid {
+                uart::print("Freeing page of process ");
+                uart::print_int(pid as u32);
+                uart::print("\n");
+                (*PAGES.offset(i)).pid = 0;
+                (*PAGES.offset(i)).order = 0;
+            }
+        }
     }
 }
 
@@ -152,9 +166,9 @@ pub fn invalidate_section(vadd: u32) {
 
 #[no_mangle]
 pub extern "C" fn kmalloc(size: isize) -> *mut u32 {
-    uart::print("\n\t\tAllocated ");
+    uart::print("\t\tAllocated ");
     uart::print_int(size as u32);
-    uart::print(" bytes!");
+    uart::print(" bytes!\n");
 
     unsafe {
         let tmp = HEAP_BEGIN as u32 + OFFSET;

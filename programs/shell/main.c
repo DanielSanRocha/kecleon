@@ -1,7 +1,7 @@
 #include <screen.h>
 
-void main() {
+void main(char* args) {
     for(int i=0;i<30;i++) {
-        print("Hello from User Space!", 0x4321);
+        print(args, 0x4321);
     }
 }

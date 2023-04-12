@@ -19,12 +19,28 @@ start:
     BL main
     B .
 
+.extern get_application_state
 .global goto_user_space
 goto_user_space:
     movw r2, #0x150
     movt r2, #0x6000
     msr spsr,r2
-    mov lr,#0x400000
+
+    bl get_application_state
+    add r0,#4
+    ldmia r0!,{r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,lr}
+    push {r1}
+    mov r1,r0
+    ldmia r1!,{r0}
+    push {r0}
+
+    ldmia r1!,{r0}
+    msr sp_usr,r0
+    ldmia r1!,{r0}
+    msr lr_usr,r0
+
+    pop {r0}
+    pop {r1}
     eret
 
 .global get_cpsr

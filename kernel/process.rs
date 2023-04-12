@@ -127,11 +127,24 @@ pub fn start(binary: &str, arguments: &str, parent: u16) -> u16 {
                     memory::alloc_page(pid);
                 }
 
-                memory::switch(pid);
-                CURRENT_PROCESS_INDEX = i as u16;
-                CURRENT_PROCESS_PID = pid;
+                //For arguments and Heap
+                let heap = memory::alloc_page(pid);
+                (*PROCESSES.offset(i)).r0 = heap;
 
+                memory::switch(pid);
                 filesystem::read(fd, USER_SPACE, nblocks);
+
+                let mut i = 0;
+                let ptr = heap as *mut u8;
+                for c in arguments.chars() {
+                    *ptr.offset(i) = c as u8;
+                    i += 1;
+                }
+                *ptr.offset(i) = 0;
+
+                if CURRENT_PROCESS_PID != 0 {
+                    memory::switch(CURRENT_PROCESS_PID);
+                }
 
                 return pid;
             }
@@ -168,6 +181,10 @@ pub extern "C" fn get_application_state() -> *mut Process {
 pub extern "C" fn exit(code: i32) {
     if code < 0 {
         screen::print("\nProgram exited!", screen::RED);
+    }
+    unsafe {
+        (*PROCESSES.offset(CURRENT_PROCESS_INDEX as isize)).pid = 0;
+        memory::free_pages(CURRENT_PROCESS_PID);
     }
 }
 
