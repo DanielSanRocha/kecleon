@@ -1,0 +1,34 @@
+use crate::memory;
+use crate::screen;
+
+const USB: *mut u32 = 0x3F980000 as *mut u32;
+
+extern "C" {
+    fn mailbox_send(msg: u32, channel: i32);
+}
+
+#[repr(packed, C)]
+#[derive(Clone, Copy)]
+struct Device {
+    number: u32,
+    port: u8,
+}
+
+static mut DEVICES: *mut Device = 0x0 as *mut Device;
+
+pub fn initialize() {
+    unsafe {
+        DEVICES = memory::kmalloc(5 * 32) as *mut Device;
+
+        mailbox_send(0x80, 0x0);
+
+        let vendor = memory::inq(USB, 16);
+        let userid = memory::inq(USB, 15);
+
+        screen::print("\n    Vendor -> ", screen::WHITE);
+        screen::print_int(vendor, screen::ORANGE);
+        screen::print("\n    UserID -> ", screen::WHITE);
+        screen::print_int(userid, screen::ORANGE);
+        screen::print("\n", screen::BLACK);
+    }
+}

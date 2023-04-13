@@ -65,7 +65,6 @@ pub fn read(fd: u16, buffer: *mut u8, nblocks: u32) -> u32 {
     }
 }
 
-use crate::screen;
 pub fn open(path: &str, process: u16) -> u16 {
     if path.len() == 0 {
         panic!("Trying to open file with empty name!");
@@ -130,7 +129,7 @@ fn open_recursion(root: u32, path: &str, process: u16) -> u16 {
 
 fn new_id() -> u16 {
     let mut nid = 1 as u16;
-    let mut i = 0;
+    let mut i;
 
     unsafe {
         loop {
@@ -167,4 +166,8 @@ fn create_fd(inode: u32, process: u16) -> u16 {
     }
 
     panic!("No more room for file descriptors!")
+}
+
+pub fn block_size() -> u32 {
+    unsafe { 1024 << (*ext2::SUPERBLOCK).lblock_size }
 }

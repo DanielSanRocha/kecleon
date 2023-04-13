@@ -45,7 +45,7 @@ pub fn initialize() {
 pub fn new_pid() -> u16 {
     // TODO optimize this algorithm
     let mut npid = 1 as u16;
-    let mut i = 0;
+    let mut i;
 
     unsafe {
         loop {
@@ -104,13 +104,13 @@ pub fn start(binary: &str, arguments: &str, parent: u16) -> u16 {
         if size == 0 {
             panic!("Error checking file size!");
         }
-        let mut nblocks = size / 1024;
-        if size > (nblocks as u32) * 1024 {
+        let mut nblocks = size / filesystem::block_size();
+        if size > (nblocks as u32) * filesystem::block_size() {
             nblocks += 1;
         }
 
-        let mut npages = nblocks / 1024;
-        if nblocks > npages * 1024 {
+        let mut npages = size / (1024 * 1024);
+        if size > npages * (1024 * 1024) {
             npages += 1;
         }
 

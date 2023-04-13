@@ -65,3 +65,10 @@ extern "C" fn uart_print(s: *const u8, length: u32) {
 extern "C" fn uart_print_int(n: u32) {
     print_int(n);
 }
+
+pub fn schedule(_deltatime: u32) {
+    let c = get_char();
+    if c != 0 {
+        // Do something
+    }
+}

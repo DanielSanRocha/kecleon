@@ -83,8 +83,12 @@ pub extern "C" fn main() {
         screen::print("Initialized!\n", screen::GREEN);
 
         screen::print("  Initializing USB Driver -> ", screen::LIGHTBLUE);
-        usb::initialize();
-        screen::print("  Initialized!\n", screen::GREEN);
+        usb::usb::initialize();
+        screen::print("  Initialized (not implemented yet)!\n", screen::GREEN);
+
+        screen::print("  Scheduling the UART check -> ", screen::LIGHTBLUE);
+        timer::schedule(uart::schedule, 10 * 1000);
+        screen::print("  Scheduled!", screen::GREEN);
 
         screen::print("  Initializing Processes  -> ", screen::LIGHTBLUE);
         interrupts::disable();

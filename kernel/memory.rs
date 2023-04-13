@@ -107,7 +107,7 @@ pub fn alloc_page(pid: u16) -> u32 {
                 (*PAGES.offset(i)).addr = 0x400000 + 0x100000 * i as u32;
                 (*PAGES.offset(i)).order = count;
 
-                return 0x400000 + 0x100000 * count as u32;;
+                return 0x400000 + 0x100000 * count as u32;
             }
         }
 

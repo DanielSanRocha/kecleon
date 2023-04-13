@@ -2,14 +2,14 @@ use crate::emmc;
 use crate::memory;
 
 #[derive(Clone, Copy)]
-struct SuperBlock {
+pub struct SuperBlock {
     number_inodes: u32,
     number_blocks: u32,
     reserved_blocks: u32,
     unallocated_blocks: u32,
     unallocated_inodes: u32,
     start_superblock: u32,
-    lblock_size: u32,
+    pub lblock_size: u32,
     lfragment_size: u32,
     block_per_group: u32,
     fragments_per_group: u32,
@@ -48,11 +48,11 @@ pub struct Inode {
     pub garbage2: [u8; 28],
 }
 
-static mut SUPERBLOCK: *const SuperBlock = 0x0 as *const SuperBlock;
+pub static mut SUPERBLOCK: *const SuperBlock = 0x0 as *const SuperBlock;
 static mut BGD: *const BlockGroupDescriptor = 0x0 as *const BlockGroupDescriptor;
 static mut BUFFER: *mut u8 = 0x0 as *mut u8;
-static mut LBLOCK_SIZE: u32 = 2;
-static mut SPB: u32 = 1024;
+static mut LBLOCK_SIZE: u32 = 0;
+static mut SPB: u32 = 0;
 
 pub fn initialize() {
     unsafe {
@@ -72,8 +72,6 @@ pub fn initialize() {
         BUFFER = memory::kmalloc(512 * SPB as isize) as *mut u8;
     }
 }
-
-use crate::screen;
 
 pub fn get_inode(number: u32, inode: *mut Inode) {
     unsafe {
