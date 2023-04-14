@@ -1,13 +1,20 @@
-const UART_DR: *mut u32 = 0x3F201000 as *mut u32;
-
 use crate::memory;
+use crate::screen;
+
+const UART_DR: *mut u32 = 0x3F201000 as *mut u32;
 
 pub fn print_char(c: u8) {
     memory::outq(UART_DR, c as u32, 0);
 }
 
-pub fn get_char() -> u8 {
-    memory::inq(UART_DR, 0) as u8
+pub fn get_char() -> char {
+    let c = memory::inq(UART_DR, 0) as u8 as char;
+
+    if c == '\r' {
+        '\n'
+    } else {
+        c
+    }
 }
 
 pub fn print_int(n: u32) {
@@ -67,8 +74,12 @@ extern "C" fn uart_print_int(n: u32) {
 }
 
 pub fn schedule(_deltatime: u32) {
+    if memory::inq(UART_DR, 6) & 0x10 != 0 {
+        return;
+    }
+
     let c = get_char();
-    if c != 0 {
-        // Do something
+    if c != '\0' {
+        screen::putc(c, &screen::WHITE);
     }
 }

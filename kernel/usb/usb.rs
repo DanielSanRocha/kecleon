@@ -1,5 +1,6 @@
 use crate::memory;
 use crate::screen;
+use crate::timer;
 
 const USB: *mut u32 = 0x3F980000 as *mut u32;
 
@@ -30,5 +31,9 @@ pub fn initialize() {
         screen::print("\n    UserID -> ", screen::WHITE);
         screen::print_int(userid, screen::ORANGE);
         screen::print("\n", screen::BLACK);
+
+        memory::outq(USB, 0x4, 0);
+        timer::sleep(1000 * 30);
+        memory::outq(USB, 0x0, 0);
     }
 }

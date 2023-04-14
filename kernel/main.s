@@ -1,5 +1,3 @@
-#include "mmu.h"
-
 .extern main
 .global start
 
@@ -12,7 +10,7 @@ start:
 
     mcr p15, 0, r0, c8, c7, 0
     mcr p15, 0, r0, c7, c5, 1
-    dsb
+    @ dsb
 
     mcr p15,0,r0,c2,c0,0
 

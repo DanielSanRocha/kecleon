@@ -6,6 +6,7 @@ pub mod emmc;
 pub mod ext2;
 pub mod filesystem;
 pub mod interrupts;
+pub mod keyboard;
 pub mod memory;
 pub mod panic;
 pub mod process;
@@ -86,9 +87,13 @@ pub extern "C" fn main() {
         usb::usb::initialize();
         screen::print("  Initialized (not implemented yet)!\n", screen::GREEN);
 
+        screen::print("  Initializing Keyboard Driver (USB/UART) ->", screen::LIGHTBLUE);
+        keyboard::initialize();
+        screen::print("  Initialized!\n", screen::GREEN);
+
         screen::print("  Scheduling the UART check -> ", screen::LIGHTBLUE);
         timer::schedule(uart::schedule, 10 * 1000);
-        screen::print("  Scheduled!", screen::GREEN);
+        screen::print("  Scheduled!\n", screen::GREEN);
 
         screen::print("  Initializing Processes  -> ", screen::LIGHTBLUE);
         interrupts::disable();
@@ -96,6 +101,7 @@ pub extern "C" fn main() {
         let pid = process::start("/bin/shell", "I am a process!", 0);
         process::start("/bin/echo", "I am another process!", 0);
         process::set_current(pid);
+        process::focus(pid);
         screen::print("Initialized!\n", screen::GREEN);
 
         screen::print("  Starting process scheduler -> ", screen::LIGHTBLUE);

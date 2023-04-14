@@ -28,7 +28,9 @@ pub struct Process {
 static mut PROCESSES: *mut Process = 0x0 as *mut Process;
 const USER_SPACE: *mut u8 = 0x400000 as *mut u8;
 static mut CURRENT_PROCESS_PID: u16 = 0x0 as u16;
-static mut CURRENT_PROCESS_INDEX: u16 = 0x0 as u16;
+static mut CURRENT_PROCESS_INDEX: u16 = 0 as u16;
+static mut FOCUS_PROCESS_PID: u16 = 0x0 as u16;
+static mut FOCUS_PROCESS_INDEX: u16 = 0 as u16;
 
 pub fn initialize() {
     unsafe {
@@ -167,6 +169,19 @@ pub fn set_current(pid: u16) {
         }
 
         panic!("Process not found!");
+    }
+}
+
+pub fn focus(pid: u16) {
+    unsafe {
+        for i in 0..=255 {
+            let proc = *PROCESSES.offset(i);
+            if proc.pid == pid {
+                FOCUS_PROCESS_INDEX = i as u16;
+                FOCUS_PROCESS_PID = proc.pid;
+                return;
+            }
+        }
     }
 }
 
