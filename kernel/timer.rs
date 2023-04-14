@@ -9,8 +9,9 @@ struct Schedule {
 }
 
 static mut SCHEDULES: *mut Schedule = 0 as *mut Schedule;
+static mut GLOBAL_COUNT: u32 = 0;
 
-const SYSTEM_TIMER_REGISTER: *mut u32 = 0x3F003000 as *mut u32;
+const SYSTEM_TIMER_REGISTER: *mut u32 = 0x101E2000 as *mut u32;
 
 pub fn initialize() {
     unsafe {
@@ -22,8 +23,8 @@ pub fn initialize() {
             (*SCHEDULES.offset(i)).interval = 0;
         }
 
-        let t0 = memory::inq(SYSTEM_TIMER_REGISTER, 1);
-        memory::outq(SYSTEM_TIMER_REGISTER, t0 + 5000, 4);
+        memory::outq(SYSTEM_TIMER_REGISTER, 100, 0);
+        memory::outq(SYSTEM_TIMER_REGISTER, 0xe2, 2);
     }
 }
 
@@ -51,35 +52,33 @@ pub fn schedule(handler: fn(deltatime: u32) -> (), interval: u32) {
 }
 
 pub fn sleep(time: u32) {
-    let t0 = memory::inq(SYSTEM_TIMER_REGISTER, 1);
-
+    let t0 = current();
     loop {
-        if memory::inq(SYSTEM_TIMER_REGISTER, 1) - t0 > time {
+        if current() - t0 > time {
             break;
         }
     }
 }
 
 pub fn current() -> u32 {
-    memory::inq(SYSTEM_TIMER_REGISTER, 1)
+    unsafe { GLOBAL_COUNT }
 }
 
 pub fn handler() {
-    memory::outq(SYSTEM_TIMER_REGISTER, 2, 0);
-
-    let t0 = memory::inq(SYSTEM_TIMER_REGISTER, 1);
-    memory::outq(SYSTEM_TIMER_REGISTER, t0 + 5000, 4);
+    memory::outq(SYSTEM_TIMER_REGISTER, 0, 3);
 
     unsafe {
+        GLOBAL_COUNT += 1;
+
         for i in 0..=63 {
             if (*SCHEDULES.offset(i)).flags == 0 {
                 continue;
             } else {
                 let schedule = *SCHEDULES.offset(i);
 
-                if schedule.last_executed + schedule.interval < t0 {
-                    let deltatime = t0 - schedule.last_executed;
-                    (*SCHEDULES.offset(i)).last_executed = t0;
+                if schedule.last_executed + schedule.interval < GLOBAL_COUNT {
+                    let deltatime = GLOBAL_COUNT - schedule.last_executed;
+                    (*SCHEDULES.offset(i)).last_executed = GLOBAL_COUNT;
                     (schedule.handler)(deltatime);
                 }
             }

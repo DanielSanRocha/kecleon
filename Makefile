@@ -70,13 +70,9 @@ build: ## Builds the kernel targetting the armv7 architecture
 	$(AS) $(AS_PARAMS) kernel/main.s -o kernel/main_s.o
 	$(AS) $(AS_PARAMS) kernel/memory.s -o kernel/memory_s.o
 	$(AS) $(AS_PARAMS) kernel/interrupts.s -o kernel/interrupts_s.o
-	$(CC) $(CC_PARAMS) -c kernel/stdlib.c -o kernel/stdlib_c.o
-	$(CC) $(CC_PARAMS) -c kernel/framebuffer.c -o kernel/framebuffer_c.o
 	$(CC) $(CC_PARAMS) -c kernel/font.c -o kernel/font_c.o
-	$(CC) $(CC_PARAMS) -c kernel/delays.c -o kernel/delays_c.o
-	$(CC) $(CC_PARAMS) -c kernel/emmc.c -o kernel/emmc_c.o
 	$(CARGO) build --target $(CARGO_TARGET)
-	$(LD) -nostdlib -T kernel/link.ld -o kernel.elf kernel/interrupts_s.o kernel/main_s.o kernel/memory_s.o kernel/framebuffer_c.o kernel/font_c.o kernel/stdlib_c.o kernel/emmc_c.o kernel/delays_c.o -Ltarget/$(CARGO_TARGET)/debug -lkecleon -Llib
+	$(LD) -nostdlib -T kernel/link.ld -o kernel.elf kernel/interrupts_s.o kernel/main_s.o kernel/memory_s.o kernel/font_c.o -Ltarget/$(CARGO_TARGET)/debug -lkecleon -Llib
 	$(OBJCOPY) -O binary kernel.elf kernel.bin
 
 boot: build programs install ## Boots the kernel in a raspi2b machine
@@ -84,4 +80,4 @@ boot: build programs install ## Boots the kernel in a raspi2b machine
 	qemu-system-arm -cpu cortex-a7 -M versatilepb -m 256 -kernel kernel.bin -hda disk.img -no-reboot -monitor telnet:127.0.0.1:1234,server,nowait -serial stdio -device usb-ehci,id=ehci -device usb-kbd,bus=ehci.0
 
 debug: build programs install ## Starts qemu in debug mode (gdb)
-	qemu-system-arm -s -S -d trace:bcm2835_* -cpu cortex-a7 -m 256 -M virt -kernel kernel.bin -sd disk.img -no-reboot -monitor telnet:127.0.0.1:1235,server,nowait -serial stdio -device usb-ehci,id=ehci -device usb-kbd,bus=ehci.0
+	qemu-system-arm -s -S -cpu cortex-a7 -m 256 -M versatilepb -kernel kernel.bin -hda disk.img -no-reboot -monitor telnet:127.0.0.1:1235,server,nowait -serial stdio -device usb-ehci,id=ehci -device usb-kbd,bus=ehci.0

@@ -1,23 +1,16 @@
 use crate::memory;
-use crate::uart;
+use crate::timer;
 
-extern "C" {
-    fn sd_init();
-    fn sd_readblock(lba: u32, buffer: *mut u8, num: u32);
-}
+const PL181: *mut u32 = 0x1000B000 as *mut u32;
 
 pub fn initialize() {
     unsafe {
-        let buffer = memory::kmalloc(512) as *mut u8;
-        sd_init();
-        sd_readblock(2, buffer, 1);
-
-        for i in 0..=511 {
-            uart::print_int(*buffer.offset(i) as u32);
-        }
+        memory::outq(PL181, 0x17, 0x0);
+        // timer::sleep(1000 * 1000);
+        loop {}
     }
 }
 
 pub fn readblock(lba: u32, buffer: *mut u8, num: u32) {
-    unsafe { sd_readblock(lba, buffer, num) }
+    // unsafe { sd_readblock(lba, buffer, num) }
 }

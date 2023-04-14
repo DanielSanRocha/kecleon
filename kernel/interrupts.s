@@ -100,13 +100,12 @@ user_irq:
 
     pop {r0}
     pop {r1}
-debug_switch:
-    subs pc,lr,#4
+    eret
 kernel_irq:
     bl irq_handler
     pop  {r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,lr}
     pop  {r0}
-    subs pc,lr,#4
+    eret
 
 swi:
     cpsid i

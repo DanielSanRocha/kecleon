@@ -1,4 +1,4 @@
-const INTERRUPTS_REGISTER: *mut u32 = 0x3F00B200 as *mut u32;
+const INTERRUPTS_REGISTER: *mut u32 = 0x10140000 as *mut u32;
 
 use crate::memory;
 use crate::process;
@@ -15,14 +15,14 @@ pub fn initialize() {
     unsafe {
         move_vector_table();
     }
-    memory::outq(INTERRUPTS_REGISTER, 3, 4);
+    memory::outq(INTERRUPTS_REGISTER, 0x10, 4);
 }
 
 #[no_mangle]
 extern "C" fn irq_handler() {
-    let pending = memory::inq(INTERRUPTS_REGISTER, 1);
+    let pending = memory::inq(INTERRUPTS_REGISTER, 0);
 
-    if (pending & 2) != 0 {
+    if (pending & 0x10) != 0 {
         timer::handler();
     }
 }

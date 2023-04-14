@@ -5,6 +5,7 @@
 pub mod emmc;
 pub mod ext2;
 pub mod filesystem;
+pub mod framebuffer;
 pub mod interrupts;
 pub mod keyboard;
 pub mod memory;
@@ -18,7 +19,6 @@ pub mod usb;
 
 extern "C" {
     fn get_cpsr() -> u32;
-    fn framebuffer_initialize() -> u32;
     fn hang();
     fn goto_user_space();
 }
@@ -33,7 +33,7 @@ pub extern "C" fn main() {
         uart::print("\nEnabled!\n");
 
         uart::print("Initializing framebuffer...");
-        let framebuffer = framebuffer_initialize() as *mut u8;
+        let framebuffer = framebuffer::initialize();
 
         if framebuffer as u32 == 0 {
             panic!("Erro initializing the framebuffer!");
@@ -66,7 +66,7 @@ pub extern "C" fn main() {
         screen::print("Initialized!\n", screen::GREEN);
 
         screen::print("  Blinking the cursor  -> ", screen::LIGHTBLUE);
-        timer::schedule(screen::blink_cursor, 500 * 1000);
+        timer::schedule(screen::blink_cursor, 5000);
         screen::print("Blinking!\n", screen::GREEN);
 
         screen::print("  Initialing Random module -> ", screen::LIGHTBLUE);
@@ -92,7 +92,7 @@ pub extern "C" fn main() {
         screen::print("  Initialized!\n", screen::GREEN);
 
         screen::print("  Scheduling the UART check -> ", screen::LIGHTBLUE);
-        timer::schedule(uart::schedule, 10 * 1000);
+        timer::schedule(uart::schedule, 500);
         screen::print("  Scheduled!\n", screen::GREEN);
 
         screen::print("  Initializing Processes  -> ", screen::LIGHTBLUE);
