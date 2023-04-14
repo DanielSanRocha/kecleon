@@ -1,33 +1,10 @@
-#include "mailbox.h"
-
 void* framebuffer_initialize() {
-    property_message_tag_t tags[5];
+    *(volatile unsigned int *)(0x1000001C) = 0x2CFC; /* timing magic for SVGA 800x600 */
+    *(volatile unsigned int *)(0x10120000) = 0x1313a4fe;
+    *(volatile unsigned int *)(0x10120004) = 0x0505f67f;
+    *(volatile unsigned int *)(0x10120008) = 0x071F1800;
+    *(volatile unsigned int *)(0x10120010) = (250 * 1024 * 1024); /* base addr of frame buffer */
+    *(volatile unsigned int *)(0x10120018) = 0x82b; /* control bits */
 
-    tags[0].proptag = FB_SET_PHYSICAL_DIMENSIONS;
-    tags[0].value_buffer.fb_screen_size.width = 1600;
-    tags[0].value_buffer.fb_screen_size.height = 900;
-    tags[1].proptag = FB_SET_VIRTUAL_DIMENSIONS;
-    tags[1].value_buffer.fb_screen_size.width = 1600;
-    tags[1].value_buffer.fb_screen_size.height = 900;
-    tags[2].proptag = FB_SET_BITS_PER_PIXEL;
-    tags[2].value_buffer.fb_bits_per_pixel = 24;
-    tags[3].proptag = NULL_TAG;
-
-     if (send_messages(tags) != 0) {
-        return 0;
-    }
-
-    // request a framebuffer
-    tags[0].proptag = FB_ALLOCATE_BUFFER;
-    tags[0].value_buffer.fb_screen_size.width = 0;
-    tags[0].value_buffer.fb_screen_size.height = 0;
-    tags[0].value_buffer.fb_allocate_align = 16;
-    tags[1].proptag = NULL_TAG;
-
-
-    if (send_messages(tags) != 0) {
-        return 0;
-    }
-
-    return tags[0].value_buffer.fb_allocate_res.fb_addr;
+    return (void*) (250 * 1024 * 1024);
 }

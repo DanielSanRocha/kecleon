@@ -1,7 +1,9 @@
 use crate::memory;
 use crate::screen;
 
-const UART_DR: *mut u32 = 0x3F201000 as *mut u32;
+// 0x3F201000 for raspberry pi 2
+// 0x101F1000 for versatilepb (qemu)
+const UART_DR: *mut u32 = 0x101F1000 as *mut u32;
 
 pub fn print_char(c: u8) {
     memory::outq(UART_DR, c as u32, 0);

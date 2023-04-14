@@ -5,8 +5,8 @@ static mut FRAMEBUFFER: *mut u8 = 0x0 as *mut u8;
 static mut CURRENT_X: isize = 0;
 static mut CURRENT_Y: isize = 0;
 
-static SCREEN_WIDTH: isize = 1600;
-static SCREEN_HEIGHT: isize = 900;
+static SCREEN_WIDTH: isize = 1024;
+static SCREEN_HEIGHT: isize = 768;
 
 extern "C" {
     pub fn font(c: u8) -> *const u8;
@@ -50,11 +50,12 @@ pub const ORANGE: Pixel = Pixel { r: 219, g: 123, b: 65 };
 
 pub fn draw_pixel(x: isize, y: isize, pix: &Pixel) {
     unsafe {
-        let location = FRAMEBUFFER.offset(y * 3 * SCREEN_WIDTH + x * 3);
+        let location = FRAMEBUFFER.offset(y * 4 * SCREEN_WIDTH + x * 4);
 
         *location.offset(0) = pix.r;
         *location.offset(1) = pix.g;
         *location.offset(2) = pix.b;
+        *location.offset(3) = 0x0;
     }
 }
 
