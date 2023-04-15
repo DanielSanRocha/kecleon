@@ -1,4 +1,5 @@
-use crate::emmc;
+use crate::storage::driver::Driver;
+use crate::storage::driver::EmptyDriver;
 use crate::memory;
 
 #[derive(Clone, Copy)]
@@ -54,10 +55,13 @@ static mut BUFFER: *mut u8 = 0x0 as *mut u8;
 static mut LBLOCK_SIZE: u32 = 0;
 static mut SPB: u32 = 0;
 
-pub fn initialize() {
+static mut STORAGE: *const dyn Driver = &EmptyDriver {};
+
+pub fn initialize(storage: *const dyn Driver) {
     unsafe {
+        STORAGE = storage;
         SUPERBLOCK = memory::kmalloc(1024) as *const SuperBlock;
-        emmc::readblock(2, SUPERBLOCK as *mut u8, 2);
+        (*STORAGE).readblock(2, SUPERBLOCK as *mut u8, 2);
 
         if (*SUPERBLOCK).magic_number != 0xef53 {
             panic!("Wrong magic number for Ext2!!");
@@ -67,7 +71,7 @@ pub fn initialize() {
         SPB = 2 * LBLOCK_SIZE;
 
         BGD = memory::kmalloc(512 * SPB as isize) as *const BlockGroupDescriptor;
-        emmc::readblock(2 * (*SUPERBLOCK).lblock_size + 4, BGD as *mut u8, SPB);
+        (*STORAGE).readblock(2 * (*SUPERBLOCK).lblock_size + 4, BGD as *mut u8, SPB);
 
         BUFFER = memory::kmalloc(512 * SPB as isize) as *mut u8;
     }
@@ -81,7 +85,7 @@ pub fn get_inode(number: u32, inode: *mut Inode) {
 
         let bgd = *BGD.offset(group as isize);
 
-        emmc::readblock(SPB * bgd.inode_table + SPB * block, BUFFER, SPB);
+        (*STORAGE).readblock(SPB * bgd.inode_table + SPB * block, BUFFER, SPB);
 
         let inodes: *mut Inode = BUFFER as *mut Inode;
         *inode = *inodes.offset(index as isize);
@@ -99,7 +103,7 @@ pub fn read_inode(inode: *const Inode, buffer: *mut u8, blocks: u32, offset: u32
             if bp == 0 {
                 return;
             }
-            emmc::readblock(SPB * bp, buffer, SPB);
+            (*STORAGE).readblock(SPB * bp, buffer, SPB);
             read_inode(inode, buffer.offset(512 * SPB as isize), blocks - 1, offset + 1);
         } else {
             //TODO implement this function

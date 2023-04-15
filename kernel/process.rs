@@ -1,6 +1,6 @@
-use crate::filesystem;
 use crate::memory;
 use crate::screen;
+use crate::storage;
 
 #[repr(packed, C)]
 #[derive(Clone, Copy)]
@@ -97,17 +97,17 @@ pub fn start(binary: &str, arguments: &str, parent: u16) -> u16 {
     unsafe {
         let pid = new_pid();
 
-        let fd = filesystem::open(binary, pid);
+        let fd = storage::filesystem::open(binary, pid);
         if fd == 0 {
             panic!("binary not found!");
         }
 
-        let size = filesystem::size(fd);
+        let size = storage::filesystem::size(fd);
         if size == 0 {
             panic!("Error checking file size!");
         }
-        let mut nblocks = size / filesystem::block_size();
-        if size > (nblocks as u32) * filesystem::block_size() {
+        let mut nblocks = size / storage::filesystem::block_size();
+        if size > (nblocks as u32) * storage::filesystem::block_size() {
             nblocks += 1;
         }
 
@@ -134,7 +134,7 @@ pub fn start(binary: &str, arguments: &str, parent: u16) -> u16 {
                 (*PROCESSES.offset(i)).r0 = heap;
 
                 memory::switch(pid);
-                filesystem::read(fd, USER_SPACE, nblocks);
+                storage::filesystem::read(fd, USER_SPACE, nblocks);
 
                 let mut i = 0;
                 let ptr = heap as *mut u8;

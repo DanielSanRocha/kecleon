@@ -40,7 +40,7 @@ make clean
 ```
 
 ## Source Code
-All the kernel related code is inside the `kernel` folder. Inside `programs` you can find simple programs writtten for the OS. The grub specification is located in `boot/grub.cfg`.
+All the kernel related code is inside the `kernel` folder. Inside `programs` you can find simple programs writtten for the OS.
 
 
 Made with Love ❤️❤️❤️ By Daniel Santana.

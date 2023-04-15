@@ -23,7 +23,7 @@ pub fn initialize() {
             (*SCHEDULES.offset(i)).interval = 0;
         }
 
-        memory::outq(SYSTEM_TIMER_REGISTER, 100, 0);
+        memory::outq(SYSTEM_TIMER_REGISTER, 1000, 0);
         memory::outq(SYSTEM_TIMER_REGISTER, 0xe2, 2);
     }
 }

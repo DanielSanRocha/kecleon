@@ -14,6 +14,7 @@ start:
 
     mcr p15,0,r0,c2,c0,0
 
+    mov r0,#0 // Machine Code
     BL main
     B .
 

@@ -2,16 +2,13 @@
 #![feature(core_intrinsics, lang_items)]
 #![feature(panic_info_message)]
 
-pub mod emmc;
-pub mod ext2;
-pub mod filesystem;
+pub mod storage;
 pub mod framebuffer;
 pub mod interrupts;
 pub mod keyboard;
 pub mod memory;
 pub mod panic;
 pub mod process;
-pub mod random;
 pub mod screen;
 pub mod timer;
 pub mod uart;
@@ -23,8 +20,10 @@ extern "C" {
     fn goto_user_space();
 }
 
+// Machine Code:
+//  1 - versatilepb (qemu)
 #[no_mangle]
-pub extern "C" fn main() {
+pub extern "C" fn main(machine: u32) {
     unsafe {
         uart::print("Starting Kernel...\n");
 
@@ -66,21 +65,24 @@ pub extern "C" fn main() {
         screen::print("Initialized!\n", screen::GREEN);
 
         screen::print("  Blinking the cursor  -> ", screen::LIGHTBLUE);
-        timer::schedule(screen::blink_cursor, 5000);
+        timer::schedule(screen::blink_cursor, 500);
         screen::print("Blinking!\n", screen::GREEN);
 
-        screen::print("  Initialing Random module -> ", screen::LIGHTBLUE);
-        random::initialize(1);
-        screen::print("Initialized! Seed -> ", screen::GREEN);
-        screen::print_int(1, screen::WHITE);
-        screen::putc('\n', &screen::BLACK);
+        screen::print("  Intializing Storage Driver -> ", screen::LIGHTBLUE);
 
-        screen::print("  Intializing EMMC     -> ", screen::LIGHTBLUE);
-        emmc::initialize();
+        let storage = if machine == 0 {
+            screen::print("\n     Initializing HardDisk...\n", screen::WHITE);
+            &storage::harddisk::HardDisk { addr: 0x0 as *mut u32 } as *const dyn storage::driver::Driver
+        } else {
+            screen::print("\n     Initializing EMMC...\n", screen::WHITE);
+            &storage::emmc::EMMC { addr: 0x1000b000 as *mut u32 } as *const dyn storage::driver::Driver
+        };
+
+        (*storage).initialize();
         screen::print("Intialized!\n", screen::GREEN);
 
         screen::print("  Intializing File System -> ", screen::LIGHTBLUE);
-        filesystem::initialize();
+        storage::filesystem::initialize(storage);
         screen::print("Initialized!\n", screen::GREEN);
 
         screen::print("  Initializing USB Driver -> ", screen::LIGHTBLUE);
@@ -105,7 +107,7 @@ pub extern "C" fn main() {
         screen::print("Initialized!\n", screen::GREEN);
 
         screen::print("  Starting process scheduler -> ", screen::LIGHTBLUE);
-        timer::schedule(process::schedule, 1000 * 10);
+        timer::schedule(process::schedule, 1000);
         screen::print("Started!\n", screen::GREEN);
 
         screen::print("\n", screen::BLACK);

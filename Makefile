@@ -77,7 +77,7 @@ build: ## Builds the kernel targetting the armv7 architecture
 
 boot: build programs install ## Boots the kernel in a raspi2b machine
 	sync
-	qemu-system-arm -cpu cortex-a7 -M versatilepb -m 256 -kernel kernel.bin -hda disk.img -no-reboot -monitor telnet:127.0.0.1:1234,server,nowait -serial stdio -device usb-ehci,id=ehci -device usb-kbd,bus=ehci.0
+	qemu-system-arm -d trace:pl181_* -cpu cortex-a7 -M versatilepb -m 256 -kernel kernel.bin -hda disk.img -no-reboot -monitor telnet:127.0.0.1:1234,server,nowait -serial stdio -global sd-card.spi=true
 
 debug: build programs install ## Starts qemu in debug mode (gdb)
-	qemu-system-arm -s -S -cpu cortex-a7 -m 256 -M versatilepb -kernel kernel.bin -hda disk.img -no-reboot -monitor telnet:127.0.0.1:1235,server,nowait -serial stdio -device usb-ehci,id=ehci -device usb-kbd,bus=ehci.0
+	qemu-system-arm -s -S -cpu cortex-a7 -m 256 -M versatilepb -kernel kernel.bin -hda disk.img -no-reboot -monitor telnet:127.0.0.1:1235,server,nowait -serial stdio

@@ -1,4 +1,5 @@
-use crate::ext2;
+use crate::storage::ext2;
+use crate::storage::driver::Driver;
 use crate::memory;
 
 #[repr(packed)]
@@ -14,8 +15,8 @@ static mut FILES: *mut File = 0x0 as *mut File;
 static mut INODE_BUFFER: *mut ext2::Inode = 0x0 as *mut ext2::Inode;
 static mut BLOCK_BUFFER: *mut u8 = 0x0 as *mut u8;
 
-pub fn initialize() {
-    ext2::initialize();
+pub fn initialize(driver: *const dyn Driver) {
+    ext2::initialize(driver);
     unsafe {
         FILES = memory::kmalloc(12 * 256) as *mut File;
 
