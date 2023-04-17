@@ -65,22 +65,33 @@ pub fn read(fd: u16, buffer: *mut u8, nblocks: u32) -> u32 {
     }
 }
 
-pub fn open(path: &str, process: u16) -> u16 {
-    if path.len() == 0 {
-        panic!("Trying to open file with empty name!");
+pub fn open(path: *const u8, process: u16) -> i32 {
+    unsafe {
+        if (*path.offset(0)) == 0 {
+            return -1;
+        }
+
+        if (*path.offset(0)) != '/' as u8 {
+            return -2;
+        }
+
+        unsafe {
+            let fd = open_recursion(2, path.offset(1), process);
+            fd as i32
+        }
     }
-
-    if path.as_bytes()[0] != '/' as u8 {
-        panic!("Path must start  with a backslash '/'!");
-    }
-
-    let fd = open_recursion(2, &path[1..path.len()], process);
-
-    fd
 }
 
-fn open_recursion(root: u32, path: &str, process: u16) -> u16 {
+fn open_recursion(root: u32, path: *const u8, process: u16) -> u16 {
     unsafe {
+        let mut size = 0 as isize;
+        loop {
+            if (*path.offset(size)) == 0 {
+                break;
+            }
+            size += 1;
+        }
+
         ext2::get_inode(root, INODE_BUFFER);
 
         if (*INODE_BUFFER).permission & 0x4000 == 0 {
@@ -99,23 +110,23 @@ fn open_recursion(root: u32, path: &str, process: u16) -> u16 {
             let namesize = *BLOCK_BUFFER.offset(i + 6);
             let mut flag = 1 as u8;
 
-            if path.len() >= namesize as usize {
+            if size >= namesize as isize {
                 for j in 0..namesize {
                     let c = *BLOCK_BUFFER.offset(8 + j as isize + i as isize) as char;
 
-                    if path.as_bytes()[j as usize] != c as u8 {
+                    if *path.offset(j as isize) != c as u8 {
                         flag = 0;
                         break;
                     }
                 }
 
                 if flag == 1 {
-                    if namesize == path.len() as u8 {
+                    if namesize == size as u8 {
                         return create_fd(inode, process);
                     }
 
-                    if path.as_bytes()[namesize as usize] == '/' as u8 {
-                        let new_path = &path[(namesize as usize + 1)..path.len()];
+                    if (*path.offset(namesize as isize)) == '/' as u8 {
+                        let new_path = path.offset(namesize as isize + 1);
                         return open_recursion(inode, new_path, process);
                     }
                 }

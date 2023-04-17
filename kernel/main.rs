@@ -119,10 +119,13 @@ pub extern "C" fn main(machine: u16) {
         log("  Initializing Processes  -> ", screen::LIGHTBLUE);
         interrupts::disable();
         process::initialize();
-        let pid = process::start("/bin/shell", "I am a process!", 0);
-        process::start("/bin/echo", "I am another process!", 0);
-        process::set_current(pid);
-        process::focus(pid);
+        let pid = process::start(b"/bin/shell".as_ptr(), b"".as_ptr(), 0);
+        if (pid < 0) {
+            panic!("Error starting shell!");
+        }
+
+        process::set_current(pid as u16);
+        process::focus(pid as u16);
         log("Initialized!\n", screen::GREEN);
 
         log("  Starting process scheduler -> ", screen::LIGHTBLUE);

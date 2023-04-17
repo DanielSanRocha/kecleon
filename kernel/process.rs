@@ -33,9 +33,11 @@ static mut CURRENT_PROCESS_PID: u16 = 0x0 as u16;
 static mut CURRENT_PROCESS_INDEX: u16 = 0 as u16;
 static mut FOCUS_PROCESS_PID: u16 = 0x0 as u16;
 static mut FOCUS_PROCESS_INDEX: u16 = 0 as u16;
+static mut ARGS_BUFFER: *mut u8 = 0x0 as *mut u8;
 
 pub fn initialize() {
     unsafe {
+        ARGS_BUFFER = memory::kmalloc(128) as *mut u8;
         PROCESSES = memory::kmalloc(76 * 256) as *mut Process;
 
         for i in 0..=255 {
@@ -96,18 +98,18 @@ pub fn schedule(_deltatime: u32) {
     }
 }
 
-pub fn start(binary: &str, arguments: &str, parent: u16) -> u16 {
+pub fn start(binary: *const u8, arguments: *const u8, parent: u16) -> i32 {
     unsafe {
         let pid = new_pid();
 
         let fd = filesystem::open(binary, pid);
-        if fd == 0 {
-            panic!("binary not found!");
+        if fd <= 0 {
+            return -16 + fd;
         }
 
-        let size = filesystem::size(fd);
+        let size = filesystem::size(fd as u16);
         if size == 0 {
-            panic!("Error checking file size!");
+            return -2;
         }
         let mut nblocks = size / filesystem::block_size();
         if size > (nblocks as u32) * filesystem::block_size() {
@@ -136,22 +138,36 @@ pub fn start(binary: &str, arguments: &str, parent: u16) -> u16 {
                 let heap = memory::alloc_page(pid);
                 (*PROCESSES.offset(i)).r0 = heap;
 
-                memory::switch(pid);
-                filesystem::read(fd, USER_SPACE, nblocks);
-
-                let mut i = 0;
-                let ptr = heap as *mut u8;
-                for c in arguments.chars() {
-                    *ptr.offset(i) = c as u8;
-                    i += 1;
+                let mut index = 0 as isize;
+                loop {
+                    let c = *arguments.offset(index);
+                    *ARGS_BUFFER.offset(index) = c as u8;
+                    index += 1;
+                    if c == 0 {
+                        break;
+                    }
                 }
-                *ptr.offset(i) = 0;
+
+                memory::switch(pid);
+                filesystem::read(fd as u16, USER_SPACE, nblocks);
+
+                let ptr = heap as *mut u8;
+
+                let mut index = 0 as isize;
+                loop {
+                    let c = *ARGS_BUFFER.offset(index);
+                    *ptr.offset(index) = c as u8;
+                    index += 1;
+                    if c == 0 {
+                        break;
+                    }
+                }
 
                 if CURRENT_PROCESS_PID != 0 {
                     memory::switch(CURRENT_PROCESS_PID);
                 }
 
-                return pid;
+                return pid as i32;
             }
         }
 
@@ -210,6 +226,8 @@ pub fn syscall(number: u16, r1: u32, r2: u32) -> i32 {
     if number == 0x0 {
         exit(r1 as i32);
         0
+    } else if number == 0x1 {
+        unsafe { start(r1 as *const u8, r2 as *const u8, CURRENT_PROCESS_PID) }
     } else {
         uart::print("Invalid process systemcall called!");
         screen::print("Invalid process systemcall called!", screen::RED);
