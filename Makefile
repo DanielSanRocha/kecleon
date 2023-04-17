@@ -48,7 +48,8 @@ programs: # Build the programs (shell, lib)
 	cd programs/lib   && $(AS) $(AS_PARAMS) syscalls.s -o syscalls_s.o
 	cd programs/lib   && $(CC) $(CC_PARAMS) -c screen.c -o screen_c.o
 	cd programs/lib   && $(CC) $(CC_PARAMS) -c process.c -o process_c.o
-	cd programs/lib   && $(AR) rvs libstd.a syscalls_s.o screen_c.o process_c.o
+	cd programs/lib   && $(CC) $(CC_PARAMS) -c keyboard.c -o keyboard_c.o
+	cd programs/lib   && $(AR) rvs libstd.a syscalls_s.o screen_c.o process_c.o keyboard_c.o
 
 	cd programs/shell && $(AS) $(AS_PARAMS) start.s -o start_s.o
 	cd programs/shell && $(CC) $(CC_PARAMS) -I../lib -c main.c -o main_c.o

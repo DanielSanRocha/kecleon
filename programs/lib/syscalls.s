@@ -15,3 +15,11 @@ exit_syscall:
     svc 0x0
     pop {lr}
     bx  lr
+
+.global getc_syscall
+getc_syscall:
+    push {lr}
+    mov r0, #0x0
+    svc 0x2
+    pop {lr}
+    bx   lr

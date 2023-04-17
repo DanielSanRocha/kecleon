@@ -1,4 +1,5 @@
 use crate::memory;
+use crate::uart;
 
 static mut FRAMEBUFFER: *mut u8 = 0x0 as *mut u8;
 
@@ -184,6 +185,8 @@ pub fn syscall(number: u16, r1: u32, r2: u32) -> i32 {
         let b = (r2 >> 16) as u8;
 
         putc(r1 as u8 as char, &Pixel { r: r, g: g, b: b });
+        uart::putc(r1 as u8);
+
         0
     } else {
         print("Invalid screen systemcall called!", RED);

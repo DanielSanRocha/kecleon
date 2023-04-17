@@ -2,6 +2,10 @@
 
 extern int putc_syscall(unsigned char c, unsigned int color);
 
+void putc(char c, unsigned int color) {
+    putc_syscall(c, color);
+}
+
 void print(char* str, unsigned int color) {
     for(unsigned int index = 0; str[index] != 0; index++) {
         putc_syscall(str[index], color);

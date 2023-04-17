@@ -1,9 +1,11 @@
 const INTERRUPTS_REGISTER: *mut u32 = 0x3F00B200 as *mut u32;
 
+use crate::keyboard;
 use crate::memory;
 use crate::process;
 use crate::screen;
 use crate::timer;
+use crate::uart;
 
 extern "C" {
     fn disable_interrupts();
@@ -53,7 +55,10 @@ extern "C" fn swi_handler(r0: u32, r1: u32, r2: u32, r3: u32) -> i32 {
         return process::syscall(number, r2, r3);
     } else if driver == 0x1 {
         return screen::syscall(number, r2, r3);
+    } else if driver == 0x2 {
+        return keyboard::syscall(number, r2, r3);
     } else {
+        uart::print("Invalid system call called!");
         screen::print("Invalid system call called!", screen::RED);
         return -1;
     }

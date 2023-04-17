@@ -1,7 +1,11 @@
 #include <screen.h>
+#include <keyboard.h>
 
 void main(char* args) {
-    for(int i=0;i<30;i++) {
-        print(args, 0x4321);
+    while(1) {
+        int c = getc();
+        if(c != 0) {
+            putc(c, 0x0000FF);
+        }
     }
 }

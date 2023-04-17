@@ -23,9 +23,30 @@ extern "C" {
     fn goto_user_space();
 }
 
+fn log(message: &str, color: screen::Pixel) {
+    uart::print(message);
+    screen::print(message, color);
+}
+
+fn log_int(n: u32, color: screen::Pixel) {
+    uart::print_int(n);
+    screen::print_int(n, color);
+}
+
+// Machine Codes:
+// 0 - Raspberry Pi 2B
+// 1 - cubieboard2
 #[no_mangle]
-pub extern "C" fn main() {
+pub extern "C" fn main(machine: u16) {
     unsafe {
+        if machine == 0 {
+            uart::initialize(0x3F201000 as *mut u32);
+        } else if machine == 1 {
+            uart::initialize(0x01C28000 as *mut u32);
+        } else {
+            panic!("Invalid machine code!");
+        }
+
         uart::print("Starting Kernel...\n");
 
         uart::print("  Enabling MMU -> ");
@@ -44,71 +65,71 @@ pub extern "C" fn main() {
         screen::initialize(framebuffer);
         uart::print("\nInitialized!\n");
 
-        screen::print("Welcome to ", screen::RED);
-        screen::print("Kecleon", screen::GREEN);
-        screen::print(" OS!\n", screen::WHITE);
+        log("Welcome to ", screen::RED);
+        log("Kecleon", screen::GREEN);
+        log(" OS!\n", screen::WHITE);
 
-        screen::print("  Framebuffer location -> ", screen::WHITE);
-        screen::print_int(framebuffer as u32, screen::GREEN);
-        screen::print("\n", screen::BLACK);
-        screen::print("  Current CPSR         -> ", screen::WHITE);
-        screen::print_int(get_cpsr(), screen::GREEN);
+        log("  Framebuffer location -> ", screen::WHITE);
+        log_int(framebuffer as u32, screen::GREEN);
+        log("\n", screen::BLACK);
+        log("  Current CPSR         -> ", screen::WHITE);
+        log_int(get_cpsr(), screen::GREEN);
 
-        screen::print("\n\n", screen::BLACK);
+        log("\n\n", screen::BLACK);
 
-        screen::print("  Enabling Interrupts  -> ", screen::LIGHTBLUE);
+        log("  Enabling Interrupts  -> ", screen::LIGHTBLUE);
         interrupts::initialize();
         interrupts::enable();
-        screen::print("Enabled!\n", screen::GREEN);
+        log("Enabled!\n", screen::GREEN);
 
-        screen::print("  Initializing Timer   -> ", screen::LIGHTBLUE);
+        log("  Initializing Timer   -> ", screen::LIGHTBLUE);
         timer::initialize();
-        screen::print("Initialized!\n", screen::GREEN);
+        log("Initialized!\n", screen::GREEN);
 
-        screen::print("  Blinking the cursor  -> ", screen::LIGHTBLUE);
+        log("  Blinking the cursor  -> ", screen::LIGHTBLUE);
         timer::schedule(screen::blink_cursor, 500 * 1000);
-        screen::print("Blinking!\n", screen::GREEN);
+        log("Blinking!\n", screen::GREEN);
 
-        screen::print("  Initialing Random module -> ", screen::LIGHTBLUE);
+        log("  Initialing Random module -> ", screen::LIGHTBLUE);
         random::initialize(1);
-        screen::print("Initialized! Seed -> ", screen::GREEN);
-        screen::print_int(1, screen::WHITE);
+        log("Initialized! Seed -> ", screen::GREEN);
+        log_int(1, screen::WHITE);
         screen::putc('\n', &screen::BLACK);
 
-        screen::print("  Intializing EMMC     -> ", screen::LIGHTBLUE);
+        log("  Intializing EMMC     -> ", screen::LIGHTBLUE);
         emmc::initialize();
-        screen::print("Intialized!\n", screen::GREEN);
+        log("Intialized!\n", screen::GREEN);
 
-        screen::print("  Intializing File System -> ", screen::LIGHTBLUE);
+        log("  Intializing File System -> ", screen::LIGHTBLUE);
         filesystem::initialize();
-        screen::print("Initialized!\n", screen::GREEN);
+        log("Initialized!\n", screen::GREEN);
 
-        screen::print("  Initializing USB Driver -> ", screen::LIGHTBLUE);
+        log("  Initializing USB Driver -> ", screen::LIGHTBLUE);
         usb::usb::initialize();
-        screen::print("  Initialized (not implemented yet)!\n", screen::GREEN);
+        log("  Initialized (not implemented yet)!\n", screen::GREEN);
 
-        screen::print("  Initializing Keyboard Driver (USB/UART) ->", screen::LIGHTBLUE);
+        log("  Initializing Keyboard Driver (USB/UART) ->", screen::LIGHTBLUE);
         keyboard::initialize();
-        screen::print("  Initialized!\n", screen::GREEN);
+        log("  Initialized!\n", screen::GREEN);
 
-        screen::print("  Scheduling the UART check -> ", screen::LIGHTBLUE);
+        log("  Scheduling the UART check -> ", screen::LIGHTBLUE);
         timer::schedule(uart::schedule, 10 * 1000);
-        screen::print("  Scheduled!\n", screen::GREEN);
+        log("  Scheduled!\n", screen::GREEN);
 
-        screen::print("  Initializing Processes  -> ", screen::LIGHTBLUE);
+        log("  Initializing Processes  -> ", screen::LIGHTBLUE);
         interrupts::disable();
         process::initialize();
         let pid = process::start("/bin/shell", "I am a process!", 0);
         process::start("/bin/echo", "I am another process!", 0);
         process::set_current(pid);
         process::focus(pid);
-        screen::print("Initialized!\n", screen::GREEN);
+        log("Initialized!\n", screen::GREEN);
 
-        screen::print("  Starting process scheduler -> ", screen::LIGHTBLUE);
+        log("  Starting process scheduler -> ", screen::LIGHTBLUE);
         timer::schedule(process::schedule, 1000 * 10);
-        screen::print("Started!\n", screen::GREEN);
+        log("Started!\n", screen::GREEN);
 
-        screen::print("\n", screen::BLACK);
+        log("\n", screen::BLACK);
         goto_user_space();
 
         hang();

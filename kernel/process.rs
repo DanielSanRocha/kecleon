@@ -1,6 +1,7 @@
 use crate::filesystem;
 use crate::memory;
 use crate::screen;
+use crate::uart;
 
 #[repr(packed, C)]
 #[derive(Clone, Copy)]
@@ -23,6 +24,7 @@ pub struct Process {
     r0: u32,
     sp: u32,
     lr: u32,
+    keys: [u8; 8],
 }
 
 static mut PROCESSES: *mut Process = 0x0 as *mut Process;
@@ -34,12 +36,13 @@ static mut FOCUS_PROCESS_INDEX: u16 = 0 as u16;
 
 pub fn initialize() {
     unsafe {
-        PROCESSES = memory::kmalloc(68 * 256) as *mut Process;
+        PROCESSES = memory::kmalloc(76 * 256) as *mut Process;
 
         for i in 0..=255 {
             (*PROCESSES.offset(i)).pid = 0;
             (*PROCESSES.offset(i)).parent = 0;
             (*PROCESSES.offset(i)).pc = 0;
+            (*PROCESSES.offset(i)).keys = [0, 0, 0, 0, 0, 0, 0, 0];
         }
     }
 }
@@ -208,7 +211,64 @@ pub fn syscall(number: u16, r1: u32, r2: u32) -> i32 {
         exit(r1 as i32);
         0
     } else {
+        uart::print("Invalid process systemcall called!");
         screen::print("Invalid process systemcall called!", screen::RED);
         -1
+    }
+}
+
+pub fn putc(c: u8) {
+    unsafe {
+        if FOCUS_PROCESS_PID == 0 {
+            return;
+        }
+
+        let keys = &mut (*PROCESSES.offset(FOCUS_PROCESS_INDEX as isize)).keys;
+
+        if (*keys)[0] == 0 {
+            (*keys)[0] = c;
+            return;
+        }
+
+        let mut i = 7;
+        loop {
+            if (*keys)[i] != 0 {
+                break;
+            }
+            i -= 1;
+        }
+
+        if i < 7 {
+            (*keys)[i + 1] = c;
+            return;
+        }
+
+        if i == 7 {
+            for j in 0..7 {
+                (*keys)[7 - j] = (*keys)[6 - j];
+                (*keys)[0] = c;
+                return;
+            }
+        }
+    }
+}
+
+pub fn getc() -> u8 {
+    unsafe {
+        if CURRENT_PROCESS_PID == 0 {
+            return 0;
+        }
+
+        let keys = &mut (*PROCESSES.offset(CURRENT_PROCESS_INDEX as isize)).keys;
+
+        let c = (*keys)[0];
+
+        for j in 0..7 {
+            (*keys)[j] = (*keys)[j + 1];
+        }
+
+        (*keys)[7] = 0;
+
+        c
     }
 }

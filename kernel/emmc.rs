@@ -1,5 +1,4 @@
 use crate::memory;
-use crate::uart;
 
 extern "C" {
     fn sd_init();
@@ -11,10 +10,6 @@ pub fn initialize() {
         let buffer = memory::kmalloc(512) as *mut u8;
         sd_init();
         sd_readblock(2, buffer, 1);
-
-        for i in 0..=511 {
-            uart::print_int(*buffer.offset(i) as u32);
-        }
     }
 }
 
